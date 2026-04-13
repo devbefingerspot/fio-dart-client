@@ -1,6 +1,6 @@
 name: fio_backend_client
 description: "Fingerspot.io backend client – storage-agnostic Dio wrapper for auth-service and fio-web-desktop-backend."
-version: 0.1.0
+version: 0.0.1
 homepage: https://github.com/devbefingerspot/fio-dart-client
 
 environment:
