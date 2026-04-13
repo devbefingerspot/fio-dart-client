@@ -52,7 +52,6 @@ class AuthService {
     try {
       await _identityDio.post<void>(
         '$_authBaseUrl/api/v1/auth/logout',
-        options: Options(extra: {'skipAuthRetry': true}),
       );
     } on DioException catch (e) {
       throw ApiError.fromDioException(e);
