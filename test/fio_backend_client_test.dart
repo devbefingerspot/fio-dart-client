@@ -11,9 +11,9 @@ class _MockAuthHandler implements MobileApiAuthHandler {
   @override
   Future<String?> getIdentityRefreshToken() async => null;
   @override
-  Future<String?> getCompanyAccessToken() async => null;
+  Future<String?> getCompanyAccessToken(String companyId) async => null;
   @override
-  Future<String?> getCompanyRefreshToken() async => null;
+  Future<String?> getCompanyRefreshToken(String companyId) async => null;
   @override
   Future<void> onIdentityTokenRefreshed({
     required String accessToken,
@@ -21,13 +21,14 @@ class _MockAuthHandler implements MobileApiAuthHandler {
   }) async {}
   @override
   Future<void> onCompanyTokenRefreshed({
+    required String companyId,
     required String accessToken,
     required String refreshToken,
   }) async {}
   @override
   Future<void> onLoggedOut() async {}
   @override
-  Future<void> onCompanyLoggedOut() async {}
+  Future<void> onCompanyLoggedOut(String companyId) async {}
 }
 
 void main() {

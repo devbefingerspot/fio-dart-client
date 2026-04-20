@@ -2,6 +2,18 @@
 ///
 /// Implement this in your app (e.g. using SharedPreferences, Hive, SecureStorage,
 /// or any other persistence layer) and pass it to [MobileApiClient].
+///
+/// ## Multi-company token storage
+///
+/// Company tokens are keyed by [companyId], allowing users to switch between
+/// multiple companies without logging out. Your storage implementation should
+/// store tokens per-company, e.g.:
+///
+/// ```dart
+/// Future<String?> getCompanyAccessToken(String companyId) async {
+///   return _storage.read(key: 'company_${companyId}_access_token');
+/// }
+/// ```
 abstract class MobileApiAuthHandler {
   // ── Identity token (no company context) ────────────────────────────────────
 
@@ -21,16 +33,21 @@ abstract class MobileApiAuthHandler {
 
   // ── Company token (company-scoped session) ──────────────────────────────────
 
-  /// Returns the stored company access token, or `null` if not available.
-  Future<String?> getCompanyAccessToken();
-
-  /// Returns the stored company refresh token, or `null` if not available.
-  Future<String?> getCompanyRefreshToken();
-
-  /// Called after a successful company token refresh.
+  /// Returns the stored company access token for [companyId], or `null` if not available.
   ///
-  /// Persist [accessToken] and [refreshToken] in your storage.
+  /// Store tokens per-company using [companyId] as part of the key.
+  Future<String?> getCompanyAccessToken(String companyId);
+
+  /// Returns the stored company refresh token for [companyId], or `null` if not available.
+  ///
+  /// Store tokens per-company using [companyId] as part of the key.
+  Future<String?> getCompanyRefreshToken(String companyId);
+
+  /// Called after a successful company token refresh for [companyId].
+  ///
+  /// Persist [accessToken] and [refreshToken] keyed by [companyId].
   Future<void> onCompanyTokenRefreshed({
+    required String companyId,
     required String accessToken,
     required String refreshToken,
   });
@@ -42,8 +59,9 @@ abstract class MobileApiAuthHandler {
   /// Clear all stored tokens and navigate to the login screen.
   Future<void> onLoggedOut();
 
-  /// Called when the company session is terminated (irrecoverable company 401).
+  /// Called when the company session for [companyId] is terminated.
   ///
-  /// Clear stored company tokens and navigate to the company-selection screen.
-  Future<void> onCompanyLoggedOut();
+  /// Clear stored company tokens for [companyId] and navigate to the
+  /// company-selection screen.
+  Future<void> onCompanyLoggedOut(String companyId);
 }

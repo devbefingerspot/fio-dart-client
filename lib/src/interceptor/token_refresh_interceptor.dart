@@ -12,6 +12,9 @@ import 'refresh_lock.dart';
 ///    [ApiError] that wraps the original [DioException].
 ///
 /// Construct one instance per token domain (identity vs. company).
+///
+/// For company token interceptors, set [companyId] to enable per-company
+/// token storage and refresh.
 class TokenRefreshInterceptor extends Interceptor {
   TokenRefreshInterceptor({
     required this.authBaseUrl,
@@ -21,21 +24,38 @@ class TokenRefreshInterceptor extends Interceptor {
     required this.onLoggedOut,
     required this.lock,
     required this.plainDio,
+    this.companyId,
   });
 
   final String authBaseUrl;
+
+  /// For identity tokens: `() => getIdentityAccessToken()`
+  /// For company tokens: `() => getCompanyAccessToken(companyId)`
   final Future<String?> Function() getAccessToken;
+
+  /// For identity tokens: `() => getIdentityRefreshToken()`
+  /// For company tokens: `() => getCompanyRefreshToken(companyId)`
   final Future<String?> Function() getRefreshToken;
+
+  /// For identity tokens: `({accessToken, refreshToken}) => onIdentityTokenRefreshed(...)`
+  /// For company tokens: `({accessToken, refreshToken}) => onCompanyTokenRefreshed(companyId: ..., ...)`
   final Future<void> Function({
     required String accessToken,
     required String refreshToken,
   }) onTokenRefreshed;
+
+  /// For identity tokens: `onLoggedOut`
+  /// For company tokens: `() => onCompanyLoggedOut(companyId)`
   final Future<void> Function() onLoggedOut;
+
   final TokenRefreshLock lock;
 
   /// A plain Dio instance (no interceptors) used exclusively for the refresh
   /// POST call, preventing infinite interceptor loops.
   final Dio plainDio;
+
+  /// The company ID for company-scoped interceptors. `null` for identity interceptors.
+  final String? companyId;
 
   @override
   Future<void> onRequest(
