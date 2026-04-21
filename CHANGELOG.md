@@ -1,3 +1,45 @@
+## 0.1.2
+
+### ⚠ Breaking changes
+
+* **`FieldRequirementStatus` enum** — `OvertimeMaster`, `Leave`, and `GpsSettingsResponse` now use the tri-state `FieldRequirementStatus` enum (`optional`, `required`, `hidden`) instead of boolean flags.
+
+  **`OvertimeMaster`** — removed `isPhotoRequired bool?` and `isNoteRequired bool?`; replaced with:
+  * `frontPhoto FieldRequirementStatus?` (JSON: `front_photo`)
+  * `additionalPhoto FieldRequirementStatus?` (JSON: `additional_photo`)
+  * `note FieldRequirementStatus?` (JSON: `note`)
+
+  **`Leave`** — removed `isPhotoRequired bool?` and `isNoteRequired bool?`; replaced with:
+  * `frontPhoto FieldRequirementStatus?` (JSON: `front_photo`)
+  * `additionalPhoto FieldRequirementStatus?` (JSON: `additional_photo`)
+  * `note FieldRequirementStatus?` (JSON: `note`)
+
+  **`GpsSettingsResponse`** — removed `isGpsFrontPhotoRequired bool`, `isGpsAdditionalPhotoRequired bool`, `isGpsNoteRequired bool`; replaced with:
+  * `gpsFrontPhoto FieldRequirementStatus` (JSON: `gps_front_photo`)
+  * `gpsAdditionalPhoto FieldRequirementStatus` (JSON: `gps_additional_photo`)
+  * `gpsNote FieldRequirementStatus` (JSON: `gps_note`)
+
+  **Migration guide** — update your conditional checks:
+  ```dart
+  // Before
+  if (master.isPhotoRequired == true) { ... }
+  if (settings.isGpsFrontPhotoRequired) { ... }
+
+  // After
+  if (master.frontPhoto == FieldRequirementStatus.required) { ... }
+  if (settings.gpsFrontPhoto == FieldRequirementStatus.required) { ... }
+
+  // To hide a field entirely
+  if (master.note == FieldRequirementStatus.hidden) { ... }
+  ```
+
+### New features
+
+* **`FieldRequirementStatus` enum** exported from `fio_backend_client.dart` (via `overtime_master.dart`). Available values: `FieldRequirementStatus.optional`, `FieldRequirementStatus.required`, `FieldRequirementStatus.hidden`.
+* **`Leave.allowMobileRequest`** (`bool?`) — added to reflect whether mobile leave requests are permitted for this leave type.
+
+---
+
 ## 0.1.1
 
 ### New features

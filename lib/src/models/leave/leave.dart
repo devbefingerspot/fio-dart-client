@@ -1,3 +1,5 @@
+import '../overtime/overtime_master.dart';
+
 /// Leave type definition (master data).
 class Leave {
   const Leave({
@@ -7,8 +9,10 @@ class Leave {
     this.amount,
     this.cycle,
     this.isPaid,
-    this.isPhotoRequired,
-    this.isNoteRequired,
+    this.allowMobileRequest,
+    this.frontPhoto,
+    this.additionalPhoto,
+    this.note,
     this.flexibleFrequency,
     this.isActive,
     this.createdAt,
@@ -21,8 +25,10 @@ class Leave {
   final int? amount;
   final String? cycle;
   final bool? isPaid;
-  final bool? isPhotoRequired;
-  final bool? isNoteRequired;
+  final bool? allowMobileRequest;
+  final FieldRequirementStatus? frontPhoto;
+  final FieldRequirementStatus? additionalPhoto;
+  final FieldRequirementStatus? note;
   final bool? flexibleFrequency;
   final bool? isActive;
   final DateTime? createdAt;
@@ -36,8 +42,16 @@ class Leave {
       amount: json['amount'] as int?,
       cycle: json['cycle'] as String?,
       isPaid: json['is_paid'] as bool?,
-      isPhotoRequired: json['is_photo_required'] as bool?,
-      isNoteRequired: json['is_note_required'] as bool?,
+      allowMobileRequest: json['allow_mobile_request'] as bool?,
+      frontPhoto: json['front_photo'] != null
+          ? FieldRequirementStatus.fromJson(json['front_photo'] as String?)
+          : null,
+      additionalPhoto: json['additional_photo'] != null
+          ? FieldRequirementStatus.fromJson(json['additional_photo'] as String?)
+          : null,
+      note: json['note'] != null
+          ? FieldRequirementStatus.fromJson(json['note'] as String?)
+          : null,
       flexibleFrequency: json['flexible_frequency'] as bool?,
       isActive: json['is_active'] as bool?,
       createdAt: json['created_at'] != null
