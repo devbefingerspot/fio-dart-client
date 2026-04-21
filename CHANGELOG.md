@@ -1,3 +1,13 @@
+## 0.1.3
+
+### New features
+
+* **`GpsSettingsResponse`** — added two new fields to reflect attachment settings from the server:
+  * `gpsAttachment FieldRequirementStatus` (JSON: `gps_attachment`) — requirement status for file attachments in GPS attendance.
+  * `gpsMaxAttachmentNumber int` (JSON: `gps_max_attachment_number`) — maximum number of file attachments allowed per GPS attendance record (defaults to `5` when absent).
+
+---
+
 ## 0.1.2
 
 ### ⚠ Breaking changes
