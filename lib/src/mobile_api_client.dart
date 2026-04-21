@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import 'handler/mobile_api_auth_handler.dart';
 import 'interceptor/refresh_lock.dart';
@@ -69,8 +70,10 @@ class MobileApiClient {
     required String authBaseUrl,
     required String backendBaseUrl,
     required MobileApiAuthHandler authHandler,
+    bool enableLogging = false,
   })  : _authBaseUrl = authBaseUrl,
-        _authHandler = authHandler {
+        _authHandler = authHandler,
+        _enableLogging = enableLogging {
     _plainDio = _buildPlainDio();
     _identityDio = _buildIdentityDio(backendBaseUrl: authBaseUrl);
     _backendDio = _buildBackendDio(backendBaseUrl: backendBaseUrl);
@@ -103,6 +106,7 @@ class MobileApiClient {
 
   final String _authBaseUrl;
   final MobileApiAuthHandler _authHandler;
+  final bool _enableLogging;
 
   late final Dio _plainDio;
   late final Dio _identityDio;
@@ -206,10 +210,13 @@ class MobileApiClient {
   // ── Dio factory helpers ──────────────────────────────────────────────────────
 
   Dio _buildPlainDio() {
-    return Dio(BaseOptions(
+    final dio = Dio(BaseOptions(
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
     ));
+
+    _attachLoggerIfEnabled(dio);
+    return dio;
   }
 
   Dio _buildIdentityDio({required String backendBaseUrl}) {
@@ -229,6 +236,8 @@ class MobileApiClient {
         plainDio: _plainDio,
       ),
     );
+
+    _attachLoggerIfEnabled(dio);
 
     return dio;
   }
@@ -279,6 +288,23 @@ class MobileApiClient {
       ),
     );
 
+    _attachLoggerIfEnabled(dio);
+
     return dio;
+  }
+
+  void _attachLoggerIfEnabled(Dio dio) {
+    if (!_enableLogging) return;
+
+    dio.interceptors.add(
+      PrettyDioLogger(
+        request: true,
+        requestBody: true,
+        responseBody: true,
+        error: true,
+        requestHeader: false,
+        responseHeader: false,
+      ),
+    );
   }
 }

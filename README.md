@@ -122,6 +122,7 @@ final client = MobileApiClient(
   authBaseUrl: 'https://auth.example.com',
   backendBaseUrl: 'https://backend.example.com', // default; can be changed later
   authHandler: MyAuthHandler(),
+  enableLogging: true, // optional: logs request/response for debugging
 );
 ```
 
@@ -421,6 +422,23 @@ The instance already has the company-token refresh interceptor attached.
 
 ---
 
+## Debug logging
+
+Use `enableLogging` in `MobileApiClient` to toggle request/response logs.
+
+```dart
+final client = MobileApiClient(
+  authBaseUrl: 'https://auth.example.com',
+  backendBaseUrl: 'https://backend.example.com',
+  authHandler: MyAuthHandler(),
+  enableLogging: true,
+);
+```
+
+If set to `false` (default), logger output is disabled.
+
+---
+
 ## API reference
 
 ### `MobileApiClient`
@@ -440,6 +458,7 @@ The instance already has the company-token refresh interceptor attached.
 | `invitations` | `InvitationService` — company invitations |
 | `setBackendBaseUrl(url)` | Change the backend base URL at runtime |
 | `backendBaseUrl` | Current backend base URL |
+| `enableLogging` (constructor) | Enable/disable request-response logging |
 | `setCurrentCompany(id)` | Set the current company context (for per-company token lookup) |
 | `clearCurrentCompany()` | Clear the company context |
 | `rawBackendClient` | Escape hatch: the raw backend `Dio` instance |

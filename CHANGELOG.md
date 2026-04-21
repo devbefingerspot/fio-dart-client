@@ -1,3 +1,12 @@
+## 0.1.1
+
+### New features
+
+* Added optional request/response logging using `pretty_dio_logger`.
+* Added `enableLogging` parameter in `MobileApiClient` (default: `false`).
+
+---
+
 ## 0.1.0
 
 ### ⚠ Breaking changes
