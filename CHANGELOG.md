@@ -6,6 +6,12 @@
   * `gpsAttachment FieldRequirementStatus` (JSON: `gps_attachment`) — requirement status for file attachments in GPS attendance.
   * `gpsMaxAttachmentNumber int` (JSON: `gps_max_attachment_number`) — maximum number of file attachments allowed per GPS attendance record (defaults to `5` when absent).
 
+### Fixes
+
+* **`GpsAttendanceService.uploadEvidence`** — normalized multipart field names for multi-file uploads to match backend parser expectations:
+  * `back_photos[]` -> `back_photos`
+  * `attachments[]` -> `attachments`
+
 ---
 
 ## 0.1.2
