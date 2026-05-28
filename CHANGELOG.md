@@ -1,3 +1,37 @@
+## 0.1.4
+
+### ⚠ Breaking changes
+
+* **`UpdateUserProfileRequest`** — `photoUrl String?` field removed; replaced with `photo MultipartFile?`.
+  The request is now sent as `multipart/form-data` instead of JSON.
+  The backend uploads the file and derives the URL server-side.
+
+  **Migration guide:**
+  ```dart
+  // Before
+  client.userProfile.update(UpdateUserProfileRequest(photoUrl: 'https://...'));
+
+  // After
+  client.userProfile.update(UpdateUserProfileRequest(
+    photo: MultipartFile.fromFileSync('/path/to/photo.jpg', filename: 'photo.jpg'),
+  ));
+  ```
+
+* **`UserProfileService.update()`** — now accepts an optional `onSendProgress` named parameter.
+
+### New features
+
+* **`UserProfileService`** (`client.userProfile`) — update the authenticated user's display name and/or profile photo.
+  * `update(UpdateUserProfileRequest, { ProgressCallback? onSendProgress })` → `Future<void>` — `POST /mobile/v1/user/update` multipart
+* **`UpdateUserProfileRequest`** model — `name String?`, `photo MultipartFile?`; at least one must be non-null.
+* **`FaceRegistryService`** (`client.faceRegistry`) — manage face-recognition photos per employee.
+  * `get({ String? targetEmployeeId })` → `Future<FaceRegistryResponse>` — `GET /mobile/v1/face-registry`
+  * `register({ required MultipartFile image, String? targetEmployeeId, String? metadata, ProgressCallback? onSendProgress })` → `Future<FaceRegistryResponse>` — `POST /mobile/v1/face-registry` multipart
+* **`FaceRegistryRecord`** model — `id`, `userId`, `companyId?`, `photoUrl`, `metadata?`, `createdAt`, `updatedAt`.
+* **`FaceRegistryResponse`** model — `companyRecord FaceRegistryRecord?`, `userOnlyRecord FaceRegistryRecord?`.
+
+---
+
 ## 0.1.3
 
 ### New features

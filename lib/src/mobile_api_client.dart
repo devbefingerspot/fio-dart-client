@@ -11,9 +11,11 @@ import 'services/gps_attendance_service.dart';
 import 'services/integrity_service.dart';
 import 'services/invitation_service.dart';
 import 'services/leave_service.dart';
+import 'services/face_registry_service.dart';
 import 'services/my_approvals_service.dart';
 import 'services/my_attendance_service.dart';
 import 'services/overtime_service.dart';
+import 'services/user_profile_service.dart';
 import 'services/user_service.dart';
 
 /// The main entry point for the fio_backend_client package.
@@ -102,6 +104,8 @@ class MobileApiClient {
     overtime = OvertimeService(backendDio: _backendDio);
     leave = LeaveService(backendDio: _backendDio);
     myApprovals = MyApprovalsService(backendDio: _backendDio);
+    userProfile = UserProfileService(backendDio: _backendDio);
+    faceRegistry = FaceRegistryService(backendDio: _backendDio);
   }
 
   final String _authBaseUrl;
@@ -164,6 +168,13 @@ class MobileApiClient {
   /// Approval operations: [MyApprovalsService.list], [MyApprovalsService.detail],
   /// [MyApprovalsService.act].
   late final MyApprovalsService myApprovals;
+
+  /// User profile update operations: [UserProfileService.update].
+  late final UserProfileService userProfile;
+
+  /// Face registry operations: [FaceRegistryService.get],
+  /// [FaceRegistryService.register].
+  late final FaceRegistryService faceRegistry;
 
   // ── Public API ──────────────────────────────────────────────────────────────
 

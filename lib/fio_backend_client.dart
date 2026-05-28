@@ -47,6 +47,7 @@ export 'src/models/auth/jwt_claims.dart';
 
 export 'src/models/user/user_info_response.dart';
 export 'src/models/user/mobile_company.dart';
+export 'src/models/user/update_user_profile_request.dart';
 
 // ── Attendance models ─────────────────────────────────────────────────────────
 
@@ -98,7 +99,10 @@ export 'src/models/integrity/ios_attest_response.dart';
 // ── Invitation models ─────────────────────────────────────────────────────────
 
 export 'src/models/invitation/company_invitation.dart';
+// ── Face registry models ───────────────────────────────────────────────
 
+export 'src/models/face_registry/face_registry_record.dart';
+export 'src/models/face_registry/face_registry_response.dart';
 // ── Services ──────────────────────────────────────────────────────────────────
 
 export 'src/services/auth_service.dart';

@@ -33,6 +33,8 @@ Handles the full mobile authentication flow — login → list companies → iss
 | `leave` | Leave requests: active leaves, submit, balance, review |
 | `myApprovals` | Pending approvals for the current user |
 | `invitations` | Company invitations: list/accept/decline |
+| `userProfile` | Update user display name and profile photo |
+| `faceRegistry` | Register and retrieve face-recognition photos |
 
 ---
 
