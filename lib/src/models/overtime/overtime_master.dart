@@ -25,6 +25,7 @@ class OvertimeMaster {
     required this.name,
     this.frontPhoto,
     this.additionalPhoto,
+    this.attachment,
     this.note,
     this.config,
     this.isActive,
@@ -37,6 +38,7 @@ class OvertimeMaster {
   final String name;
   final FieldRequirementStatus? frontPhoto;
   final FieldRequirementStatus? additionalPhoto;
+  final FieldRequirementStatus? attachment;
   final FieldRequirementStatus? note;
   final Map<String, dynamic>? config;
   final bool? isActive;
@@ -53,6 +55,9 @@ class OvertimeMaster {
           : null,
       additionalPhoto: json['additional_photo'] != null
           ? FieldRequirementStatus.fromJson(json['additional_photo'] as String?)
+          : null,
+      attachment: json['attachment'] != null
+          ? FieldRequirementStatus.fromJson(json['attachment'] as String?)
           : null,
       note: json['note'] != null
           ? FieldRequirementStatus.fromJson(json['note'] as String?)

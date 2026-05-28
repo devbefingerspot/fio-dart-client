@@ -1,3 +1,12 @@
+## 0.1.7
+
+### New features
+
+* **`Leave.attachment`** — added `FieldRequirementStatus? attachment` field (JSON: `attachment`) matching the existing `frontPhoto`/`additionalPhoto`/`note` pattern. Indicates whether an attachment is `optional`, `required`, or `hidden` for a given leave type.
+* **`OvertimeMaster.attachment`** — added `FieldRequirementStatus? attachment` field (JSON: `attachment`) to `OvertimeMaster`, following the same tri-state pattern as the other media fields.
+
+---
+
 ## 0.1.6
 
 ### New features
