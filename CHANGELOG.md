@@ -1,4 +1,4 @@
-## 0.1.4
+## 0.1.5
 
 ### ⚠ Breaking changes
 
@@ -32,6 +32,27 @@
 
 ---
 
+## 0.1.4
+
+### New features
+
+* **`UserService.getProfile`** — added optional `tokenType` parameter to choose which access token to use:
+  * `UserProfileTokenType.identity` (default) — uses the identity access token; `UserInfoResponse.company` and `UserInfoResponse.role` will be `null`.
+  * `UserProfileTokenType.company` — uses the currently selected company's access token (via `setCurrentCompany`); response includes company and role information.
+* **`UserProfileTokenType` enum** exported from `fio_backend_client.dart` (via `user_service.dart`).
+
+  ```dart
+  // Identity context (default, unchanged)
+  final me = await client.user.getProfile();
+
+  // Company context — requires setCurrentCompany() to have been called
+  final meWithCompany = await client.user.getProfile(
+    tokenType: UserProfileTokenType.company,
+  );
+  ```
+
+---
+
 ## 0.1.3
 
 ### New features
@@ -39,6 +60,12 @@
 * **`GpsSettingsResponse`** — added two new fields to reflect attachment settings from the server:
   * `gpsAttachment FieldRequirementStatus` (JSON: `gps_attachment`) — requirement status for file attachments in GPS attendance.
   * `gpsMaxAttachmentNumber int` (JSON: `gps_max_attachment_number`) — maximum number of file attachments allowed per GPS attendance record (defaults to `5` when absent).
+
+### Fixes
+
+* **`GpsAttendanceService.uploadEvidence`** — normalized multipart field names for multi-file uploads to match backend parser expectations:
+  * `back_photos[]` -> `back_photos`
+  * `attachments[]` -> `attachments`
 
 ---
 

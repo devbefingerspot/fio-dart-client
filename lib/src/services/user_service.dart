@@ -4,32 +4,52 @@ import '../models/api_error.dart';
 import '../models/user/mobile_company.dart';
 import '../models/user/user_info_response.dart';
 
+/// Which access token to use when calling [UserService.getProfile].
+enum UserProfileTokenType {
+  /// Use the identity access token. [UserInfoResponse.company] and
+  /// [UserInfoResponse.role] will be `null` (no company context).
+  identity,
+
+  /// Use the currently selected company's access token. The response will
+  /// include company and role information.
+  company,
+}
+
 /// Provides user-info operations against the auth-service.
 ///
 /// Obtain this via [MobileApiClient.user].
 class UserService {
   UserService({
     required Dio identityDio,
+    required Dio backendDio,
     required String authBaseUrl,
   })  : _identityDio = identityDio,
+        _backendDio = backendDio,
         _authBaseUrl = authBaseUrl;
 
   final Dio _identityDio;
+  final Dio _backendDio;
   final String _authBaseUrl;
 
   /// GET /api/v1/user/me
   ///
-  /// Returns the authenticated user's profile. Works with both identity and
-  /// company access tokens (the interceptor attaches whichever token is
-  /// configured on the identity Dio instance).
+  /// Returns the authenticated user's profile. By default the identity
+  /// access token is used; pass [tokenType] = [UserProfileTokenType.company]
+  /// to call the endpoint with the currently selected company's token
+  /// (which causes the server to include company and role information).
   ///
-  /// [UserInfoResponse.company] and [UserInfoResponse.role] will be `null`
-  /// when called with an identity token (no company context).
+  /// When [tokenType] is [UserProfileTokenType.identity],
+  /// [UserInfoResponse.company] and [UserInfoResponse.role] will be `null`.
   ///
   /// Throws [ApiError] on any non-2xx response.
-  Future<UserInfoResponse> getProfile() async {
+  Future<UserInfoResponse> getProfile({
+    UserProfileTokenType tokenType = UserProfileTokenType.identity,
+  }) async {
     try {
-      final response = await _identityDio.get<Map<String, dynamic>>(
+      final dio = tokenType == UserProfileTokenType.company
+          ? _backendDio
+          : _identityDio;
+      final response = await dio.get<Map<String, dynamic>>(
         '$_authBaseUrl/api/v1/user/me',
       );
       return UserInfoResponse.fromJson(response.data!);

@@ -91,13 +91,13 @@ class GpsAttendanceService {
 
       if (backPhotos != null) {
         for (final photo in backPhotos) {
-          formData.files.add(MapEntry('back_photos[]', photo));
+          formData.files.add(MapEntry('back_photos', photo));
         }
       }
 
       if (attachments != null) {
         for (final file in attachments) {
-          formData.files.add(MapEntry('attachments[]', file));
+          formData.files.add(MapEntry('attachments', file));
         }
       }
 

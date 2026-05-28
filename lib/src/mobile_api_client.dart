@@ -88,6 +88,7 @@ class MobileApiClient {
     );
     user = UserService(
       identityDio: _identityDio,
+      backendDio: _backendDio,
       authBaseUrl: authBaseUrl,
     );
     invitations = InvitationService(
