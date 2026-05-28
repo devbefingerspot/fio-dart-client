@@ -1,3 +1,18 @@
+## 0.1.6
+
+### New features
+
+* **`GpsSettingsResponse`** — added two new fields:
+  * `maxAttachmentNumber int` (JSON: `max_attachment_number`) — maximum number of file attachments per GPS attendance record.
+  * `maxAdditionalPhotoNumber int` (JSON: `max_additional_photo_number`) — maximum number of additional photos per GPS attendance record (defaults to `3` when absent).
+* **`GpsSettingsResponse.fromJson`** — `maxAttachmentNumber` falls back to the deprecated `gps_max_attachment_number` key for compatibility with older server versions.
+
+### Deprecated
+
+* **`GpsSettingsResponse.gpsMaxAttachmentNumber`** — deprecated in favour of `maxAttachmentNumber`. The getter still works and delegates to `maxAttachmentNumber`.
+
+---
+
 ## 0.1.5
 
 ### ⚠ Breaking changes
