@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 
 import '../models/api_error.dart';
+import '../models/auth/change_otp_response.dart';
 import '../models/auth/issue_company_token_request.dart';
 import '../models/auth/issue_company_token_response.dart';
 import '../models/auth/login_request.dart';
 import '../models/auth/login_response.dart';
+import '../models/auth/otp_response.dart';
 
 /// Provides authentication operations against the auth-service.
 ///
@@ -74,6 +76,138 @@ class AuthService {
         data: request.toJson(),
       );
       return IssueCompanyTokenResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/otp/request
+  ///
+  /// Mengirim OTP generic ke user (email/phone sesuai [verifyMode]).
+  /// Membutuhkan company context ([companyId]).
+  ///
+  /// [verifyType] contoh: `"change_password"`, `"change_device"`, `"login"`, dll.
+  /// [verifyMode]: `"email"` atau `"phone"`.
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<OTPRequestResponse> otpRequest(
+    String companyId,
+    String verifyType,
+    String verifyMode,
+  ) async {
+    try {
+      final response = await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/otp/request',
+        data: {
+          'verify_type': verifyType,
+          'verify_mode': verifyMode,
+        },
+        options: Options(headers: {'X-Company-ID': companyId}),
+      );
+      return OTPRequestResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/otp/verify
+  ///
+  /// Memverifikasi kode OTP generic.
+  /// Membutuhkan company context ([companyId]).
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<OTPVerifyResponse> otpVerify(
+    String companyId,
+    String code,
+    String verifyType,
+    String verifyMode,
+  ) async {
+    try {
+      final response = await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/otp/verify',
+        data: {
+          'code': code,
+          'verify_type': verifyType,
+          'verify_mode': verifyMode,
+        },
+        options: Options(headers: {'X-Company-ID': companyId}),
+      );
+      return OTPVerifyResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/otp/change-email/request
+  ///
+  /// Mengirim OTP ke email BARU untuk change email.
+  /// Syarat: email lama user harus sudah terverifikasi (EmailVerifiedAt != nil).
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<ChangeOTPResponse> requestChangeEmailOTP(String newEmail) async {
+    try {
+      final response = await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/otp/change-email/request',
+        data: {'new_email': newEmail},
+      );
+      return ChangeOTPResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/otp/change-phone/request
+  ///
+  /// Mengirim OTP ke nomor telepon BARU untuk change phone.
+  /// Syarat: nomor telepon lama user harus sudah terverifikasi (PhoneVerifiedAt != nil).
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<ChangeOTPResponse> requestChangePhoneOTP(
+    String newPhoneCode,
+    String newPhone,
+  ) async {
+    try {
+      final response = await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/otp/change-phone/request',
+        data: {
+          'new_phone_code': newPhoneCode,
+          'new_phone': newPhone,
+        },
+      );
+      return ChangeOTPResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/auth/change-password
+  ///
+  /// Mengubah password user yang sudah terautentikasi.
+  /// OTP harus diminta terlebih dahulu via [otpRequest] dengan
+  /// `verifyType = "change_password"`.
+  ///
+  /// - [currentPassword]: password lama (divalidasi server-side)
+  /// - [newPassword]: password baru
+  /// - [otpCode]: kode OTP yang sudah dikirim ke email/phone
+  /// - [verifyMode]: `"email"` atau `"phone"` (harus sama dengan saat OTP request)
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String otpCode,
+    required String verifyMode,
+  }) async {
+    try {
+      await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/auth/change-password',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+          'otp_code': otpCode,
+          'verify_mode': verifyMode,
+        },
+      );
     } on DioException catch (e) {
       throw ApiError.fromDioException(e);
     }

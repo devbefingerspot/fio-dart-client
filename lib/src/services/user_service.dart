@@ -81,4 +81,51 @@ class UserService {
       throw ApiError.fromDioException(e);
     }
   }
+
+  /// POST /api/v1/user/change-email
+  ///
+  /// Mengubah email user setelah memverifikasi OTP.
+  /// OTP harus diminta terlebih dahulu via [AuthService.requestChangeEmailOTP].
+  /// Syarat: email lama sudah terverifikasi (EmailVerifiedAt != nil).
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<void> changeEmail(String newEmail, String otpCode) async {
+    try {
+      await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/user/change-email',
+        data: {
+          'new_email': newEmail,
+          'otp_code': otpCode,
+        },
+      );
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/user/change-phone
+  ///
+  /// Mengubah nomor telepon user setelah memverifikasi OTP.
+  /// OTP harus diminta terlebih dahulu via [AuthService.requestChangePhoneOTP].
+  /// Syarat: nomor telepon lama sudah terverifikasi (PhoneVerifiedAt != nil).
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<void> changePhone(
+    String newPhoneCode,
+    String newPhone,
+    String otpCode,
+  ) async {
+    try {
+      await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/user/change-phone',
+        data: {
+          'new_phone_code': newPhoneCode,
+          'new_phone': newPhone,
+          'otp_code': otpCode,
+        },
+      );
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
 }

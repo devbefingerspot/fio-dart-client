@@ -1,3 +1,36 @@
+## 0.1.8
+
+### New features
+
+* **Change Email / Change Phone** — added full support for the new auth-service flow:
+
+  * **`AuthService.requestChangeEmailOTP(newEmail)`** — `POST /api/v1/otp/change-email/request`
+    Mengirim OTP ke email BARU. Syarat: email lama sudah terverifikasi.
+
+  * **`AuthService.requestChangePhoneOTP(newPhoneCode, newPhone)`** — `POST /api/v1/otp/change-phone/request`
+    Mengirim OTP ke nomor telepon BARU via WhatsApp. Syarat: nomor lama sudah terverifikasi.
+
+  * **`UserService.changeEmail(newEmail, otpCode)`** — `POST /api/v1/user/change-email`
+    Mengubah email setelah verifikasi OTP.
+
+  * **`UserService.changePhone(newPhoneCode, newPhone, otpCode)`** — `POST /api/v1/user/change-phone`
+    Mengubah nomor telepon setelah verifikasi OTP.
+
+* **`ChangeOTPResponse`** model — response wrapper for both change-email and change-phone OTP request endpoints.
+
+* **`AuthService.changePassword`** — `POST /api/v1/auth/change-password`
+  Mengubah password user. Membutuhkan `currentPassword`, `newPassword`, `otpCode`, dan `verifyMode` (`'email'` / `'phone'`). OTP harus diminta terlebih dahulu via [AuthService.otpRequest] dengan `verifyType = "change_password"`.
+
+* **`AuthService.otpRequest`** — `POST /api/v1/otp/request`
+  Mengirim OTP generic (change_password, change_device, login, dll). Membutuhkan `companyId`, `verifyType`, dan `verifyMode`.
+
+* **`AuthService.otpVerify`** — `POST /api/v1/otp/verify`
+  Memverifikasi kode OTP generic. Membutuhkan `companyId`, `code`, `verifyType`, dan `verifyMode`.
+
+* **`OTPRequestResponse`** / **`OTPVerifyResponse`** — model untuk response generic OTP request/verify.
+
+---
+
 ## 0.1.7
 
 ### New features

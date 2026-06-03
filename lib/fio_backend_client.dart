@@ -42,6 +42,8 @@ export 'src/models/auth/issue_company_token_request.dart';
 export 'src/models/auth/issue_company_token_response.dart';
 export 'src/models/auth/refresh_token_response.dart';
 export 'src/models/auth/jwt_claims.dart';
+export 'src/models/auth/change_otp_response.dart';
+export 'src/models/auth/otp_response.dart';
 
 // ── User models ───────────────────────────────────────────────────────────────
 
