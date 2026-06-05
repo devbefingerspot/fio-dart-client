@@ -19,6 +19,8 @@ class SubmitGpsAttendanceRequest {
     required this.longitude,
     this.note,
     this.deviceName,
+    this.wifiSsid,
+    this.wifiMacAddress,
     this.integrityPlatform,
     this.integrityToken,
     this.integrityChallenge,
@@ -40,6 +42,12 @@ class SubmitGpsAttendanceRequest {
 
   /// Device name or model.
   final String? deviceName;
+
+  /// WiFi SSID detected by the device at the attendance location.
+  final String? wifiSsid;
+
+  /// WiFi MAC address (BSSID) detected by the device at the attendance location.
+  final String? wifiMacAddress;
 
   /// Platform for integrity verification: android, ios, or debug.
   final IntegrityPlatform? integrityPlatform;
@@ -64,6 +72,8 @@ class SubmitGpsAttendanceRequest {
     };
     if (note != null) map['note'] = note;
     if (deviceName != null) map['device_name'] = deviceName;
+    if (wifiSsid != null) map['wifi_ssid'] = wifiSsid;
+    if (wifiMacAddress != null) map['wifi_mac_address'] = wifiMacAddress;
     if (integrityPlatform != null) {
       map['integrity_platform'] = integrityPlatform!.value;
     }

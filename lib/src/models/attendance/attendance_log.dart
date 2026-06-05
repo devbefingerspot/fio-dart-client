@@ -109,6 +109,9 @@ class AttendanceLogMetadata {
     this.note,
     this.livenessMetrics,
     this.deviceMetrics,
+    this.wifiSsid,
+    this.wifiMacAddress,
+    this.distanceFromOfficeMeter,
     this.createdAt,
     this.updatedAt,
   });
@@ -120,6 +123,9 @@ class AttendanceLogMetadata {
   final String? note;
   final Map<String, dynamic>? livenessMetrics;
   final Map<String, dynamic>? deviceMetrics;
+  final String? wifiSsid;
+  final String? wifiMacAddress;
+  final double? distanceFromOfficeMeter;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -136,6 +142,10 @@ class AttendanceLogMetadata {
       note: json['note'] as String?,
       livenessMetrics: json['liveness_metrics'] as Map<String, dynamic>?,
       deviceMetrics: json['device_metrics'] as Map<String, dynamic>?,
+      wifiSsid: json['wifi_ssid'] as String?,
+      wifiMacAddress: json['wifi_mac_address'] as String?,
+      distanceFromOfficeMeter:
+          (json['distance_from_office_meter'] as num?)?.toDouble(),
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,

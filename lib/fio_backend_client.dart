@@ -27,6 +27,7 @@ export 'src/models/api_error.dart';
 
 // ── Common models ─────────────────────────────────────────────────────────────
 
+export 'src/models/common/office.dart';
 export 'src/models/common/pagination_meta.dart';
 export 'src/models/common/paginated_response.dart';
 export 'src/models/common/pagination_params.dart';
@@ -117,6 +118,7 @@ export 'src/services/employee_service.dart';
 export 'src/services/overtime_service.dart';
 export 'src/services/leave_service.dart';
 export 'src/services/my_approvals_service.dart';
+export 'src/services/office_service.dart';
 export 'src/services/invitation_service.dart';
 
 // ── Utils ─────────────────────────────────────────────────────────────────────

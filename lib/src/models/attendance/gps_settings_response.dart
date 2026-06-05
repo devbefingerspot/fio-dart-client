@@ -9,6 +9,7 @@ class GpsSettingsResponse {
     required this.gpsAttachment,
     required this.maxAttachmentNumber,
     required this.maxAdditionalPhotoNumber,
+    this.gpsMaxDistanceFromOfficeMeter,
   });
 
   /// Requirement status for front (selfie) photo in GPS attendance.
@@ -29,6 +30,9 @@ class GpsSettingsResponse {
   /// Maximum number of additional photos allowed per GPS attendance record.
   final int maxAdditionalPhotoNumber;
 
+  /// Maximum distance in meters from the assigned office for GPS attendance.
+  final int? gpsMaxDistanceFromOfficeMeter;
+
   /// Deprecated: use [maxAttachmentNumber] instead.
   @Deprecated('Use maxAttachmentNumber instead.')
   int get gpsMaxAttachmentNumber => maxAttachmentNumber;
@@ -48,6 +52,8 @@ class GpsSettingsResponse {
           5,
       maxAdditionalPhotoNumber:
           (json['max_additional_photo_number'] as num?)?.toInt() ?? 3,
+      gpsMaxDistanceFromOfficeMeter:
+          (json['gps_max_distance_from_office_meter'] as num?)?.toInt(),
     );
   }
 }

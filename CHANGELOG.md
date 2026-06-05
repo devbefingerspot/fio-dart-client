@@ -1,3 +1,25 @@
+## 0.1.9
+
+### New features
+
+* **`OfficeService.getMyOffices()`** — `GET /mobile/v1/offices`
+  Returns a list of offices based on user role:
+  owner/subadmin/admin see all offices, employee only sees their own office.
+
+* **`Office`** model — `id`, `label`, `address`, `latitude`, `longitude`,
+  `wifiSsids`, `wifiMacAddresses`, `companyId`.
+
+* **GPS auto-approval fields** — `SubmitGpsAttendanceRequest` now has
+  optional `wifiSsid` and `wifiMacAddress` fields to send alongside
+  GPS attendance submission. The backend will use this data for
+  auto-approval if it matches the office WiFi settings.
+
+* **`GpsSettingsResponse.gpsMaxDistanceFromOfficeMeter`** — new setting
+  from the backend for maximum GPS attendance distance from office in meters.
+
+* **`AttendanceLogMetadata`** — added `wifiSsid`, `wifiMacAddress`,
+  and `distanceFromOfficeMeter` fields.
+
 ## 0.1.8
 
 ### New features
@@ -5,29 +27,29 @@
 * **Change Email / Change Phone** — added full support for the new auth-service flow:
 
   * **`AuthService.requestChangeEmailOTP(newEmail)`** — `POST /api/v1/otp/change-email/request`
-    Mengirim OTP ke email BARU. Syarat: email lama sudah terverifikasi.
+    Sends OTP to the NEW email. Requirement: old email must already be verified.
 
   * **`AuthService.requestChangePhoneOTP(newPhoneCode, newPhone)`** — `POST /api/v1/otp/change-phone/request`
-    Mengirim OTP ke nomor telepon BARU via WhatsApp. Syarat: nomor lama sudah terverifikasi.
+    Sends OTP to the NEW phone number via WhatsApp. Requirement: old phone number must already be verified.
 
   * **`UserService.changeEmail(newEmail, otpCode)`** — `POST /api/v1/user/change-email`
-    Mengubah email setelah verifikasi OTP.
+    Changes email after OTP verification.
 
   * **`UserService.changePhone(newPhoneCode, newPhone, otpCode)`** — `POST /api/v1/user/change-phone`
-    Mengubah nomor telepon setelah verifikasi OTP.
+    Changes phone number after OTP verification.
 
 * **`ChangeOTPResponse`** model — response wrapper for both change-email and change-phone OTP request endpoints.
 
 * **`AuthService.changePassword`** — `POST /api/v1/auth/change-password`
-  Mengubah password user. Membutuhkan `currentPassword`, `newPassword`, `otpCode`, dan `verifyMode` (`'email'` / `'phone'`). OTP harus diminta terlebih dahulu via [AuthService.otpRequest] dengan `verifyType = "change_password"`.
+  Changes user password. Requires `currentPassword`, `newPassword`, `otpCode`, and `verifyMode` (`'email'` / `'phone'`). OTP must be requested first via [AuthService.otpRequest] with `verifyType = "change_password"`.
 
 * **`AuthService.otpRequest`** — `POST /api/v1/otp/request`
-  Mengirim OTP generic (change_password, change_device, login, dll). Membutuhkan `companyId`, `verifyType`, dan `verifyMode`.
+  Sends generic OTP (change_password, change_device, login, etc.). Requires `companyId`, `verifyType`, and `verifyMode`.
 
 * **`AuthService.otpVerify`** — `POST /api/v1/otp/verify`
-  Memverifikasi kode OTP generic. Membutuhkan `companyId`, `code`, `verifyType`, dan `verifyMode`.
+  Verifies generic OTP code. Requires `companyId`, `code`, `verifyType`, and `verifyMode`.
 
-* **`OTPRequestResponse`** / **`OTPVerifyResponse`** — model untuk response generic OTP request/verify.
+* **`OTPRequestResponse`** / **`OTPVerifyResponse`** — models for generic OTP request/verify response.
 
 ---
 
