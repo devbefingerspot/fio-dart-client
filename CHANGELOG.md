@@ -1,3 +1,28 @@
+## 0.2.0
+
+### New features
+
+* **`AuthService.requestEmailVerificationOTP()`** — `POST /api/v1/otp/email/request`
+  Sends an OTP to the user's email for email verification.
+  Does not require company context.
+
+* **`AuthService.verifyEmailOTP(code)`** — `POST /api/v1/otp/email/verify`
+  Verifies the OTP code sent to email and sets `email_verified_at`.
+  Does not require company context.
+
+* **`AuthService.requestPhoneVerificationOTP()`** — `POST /api/v1/otp/phone/request`
+  Sends an OTP to the user's phone number via WhatsApp for phone verification.
+  Does not require company context.
+
+* **`AuthService.verifyPhoneOTP(code)`** — `POST /api/v1/otp/phone/verify`
+  Verifies the OTP code sent to phone and sets `phone_verified_at`.
+  Does not require company context.
+
+* **`OTPVerificationVerifyResponse`** — model for email/phone verification response.
+  Fields: `message`, `emailVerifiedAt` (nullable), `phoneVerifiedAt` (nullable).
+
+---
+
 ## 0.1.9
 
 ### New features

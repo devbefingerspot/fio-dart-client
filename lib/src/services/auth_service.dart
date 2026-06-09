@@ -138,6 +138,81 @@ class AuthService {
     }
   }
 
+  /// POST /api/v1/otp/email/request
+  ///
+  /// Sends an OTP to the user's email for email verification.
+  /// Does not require company context.
+  /// Will be rejected if the email is already verified.
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<OTPRequestResponse> requestEmailVerificationOTP() async {
+    try {
+      final response = await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/otp/email/request',
+      );
+      return OTPRequestResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/otp/email/verify
+  ///
+  /// Verifies the OTP code sent to the user's email and sets
+  /// `email_verified_at` on success.
+  /// Does not require company context.
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<OTPVerificationVerifyResponse> verifyEmailOTP(String code) async {
+    try {
+      final response = await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/otp/email/verify',
+        data: {'code': code},
+      );
+      return OTPVerificationVerifyResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/otp/phone/request
+  ///
+  /// Sends an OTP to the user's phone number via WhatsApp for phone
+  /// verification.
+  /// Does not require company context.
+  /// Will be rejected if the phone number is already verified.
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<OTPRequestResponse> requestPhoneVerificationOTP() async {
+    try {
+      final response = await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/otp/phone/request',
+      );
+      return OTPRequestResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
+  /// POST /api/v1/otp/phone/verify
+  ///
+  /// Verifies the OTP code sent to the user's phone and sets
+  /// `phone_verified_at` on success.
+  /// Does not require company context.
+  ///
+  /// Throws [ApiError] on any non-2xx response.
+  Future<OTPVerificationVerifyResponse> verifyPhoneOTP(String code) async {
+    try {
+      final response = await _identityDio.post<Map<String, dynamic>>(
+        '$_authBaseUrl/api/v1/otp/phone/verify',
+        data: {'code': code},
+      );
+      return OTPVerificationVerifyResponse.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiError.fromDioException(e);
+    }
+  }
+
   /// POST /api/v1/otp/change-email/request
   ///
   /// Mengirim OTP ke email BARU untuk change email.

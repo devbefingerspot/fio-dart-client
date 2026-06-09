@@ -37,3 +37,27 @@ class OTPVerifyResponse {
     );
   }
 }
+
+/// Response dari endpoint OTP verify untuk email/phone verification.
+///
+/// POST /api/v1/otp/email/verify  → [emailVerifiedAt] terisi
+/// POST /api/v1/otp/phone/verify  → [phoneVerifiedAt] terisi
+class OTPVerificationVerifyResponse {
+  const OTPVerificationVerifyResponse({
+    required this.message,
+    this.emailVerifiedAt,
+    this.phoneVerifiedAt,
+  });
+
+  final String message;
+  final String? emailVerifiedAt;
+  final String? phoneVerifiedAt;
+
+  factory OTPVerificationVerifyResponse.fromJson(Map<String, dynamic> json) {
+    return OTPVerificationVerifyResponse(
+      message: json['message'] as String,
+      emailVerifiedAt: json['email_verified_at'] as String?,
+      phoneVerifiedAt: json['phone_verified_at'] as String?,
+    );
+  }
+}
