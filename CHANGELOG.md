@@ -1,3 +1,80 @@
+## Unreleased
+
+### New features
+
+* **`DeviceService.getMyDevices()`** — `GET /api/v1/user/my-devices`
+  Returns all registered mobile devices for the authenticated user across
+  all companies. Uses the identity access token.
+
+* **`DeviceService.createDeviceChangeRequest()`** — `POST /api/v1/device-change-request`
+  Submits a request to change a mobile device. The user specifies which old
+  device to replace (by its `device_id`) along with the new device details.
+  The request must be reviewed and approved by a web admin before the
+  device swap is executed.
+
+* **`MyDevice`** — model for individual registered mobile devices.
+  Fields: `deviceId`, `fcmToken`, `companyId`, `createdAt`.
+
+* **`CreateDeviceChangeRequestRequest`** — request body for device change.
+  Fields: `oldDeviceId`, `deviceUniqueIdentifier`, `fcmToken`, `userAgent`,
+  `detail`, `companyId`.
+
+* **`CreateDeviceChangeRequestResponse`** — response after submitting a
+  device change request. Fields: `message`, `id`.
+
+### Breaking changes
+
+* **`AuthService.ChangeEmployeeDevice()`** — removed. The direct
+  admin-forced device change endpoint has been replaced by the
+  request-approval workflow (`DeviceService.createDeviceChangeRequest()`).
+
+---
+
+## 0.2.0
+  Submits a single real-time GPS location ping with automatic geofence
+  boundary-crossing detection (enter/exit events).
+
+* **`LocationService.submitBatch()`** — `POST /mobile/v1/location/batch`
+  Submits a batch of buffered location pings (max 500 per request).
+  Geofence detection is performed per ping.
+
+* **`LocationService.startSession()`** — `POST /mobile/v1/location/sessions`
+  Starts a new location tracking session (periodic or trip).
+
+* **`LocationService.updateSession()`** — `PUT /mobile/v1/location/sessions/:id`
+  Pauses or completes an active location session. Optionally stores total
+  distance and duration.
+
+* **`LocationService.listSessions()`** — `GET /mobile/v1/location/sessions`
+  Returns paginated list of location sessions. Self + subordinates for
+  managers; all employees for owner.
+
+* **`LocationService.getSessionDetail()`** — `GET /mobile/v1/location/sessions/:id`
+  Returns a session with its paginated pings sorted by recorded time.
+
+* **`LocationService.queryHistory()`** — `GET /mobile/v1/location/history`
+  Returns paginated location ping history across a date range. Self +
+  subordinates for managers; all employees for owner.
+
+* **`LocationService.listGeofences()`** — `GET /mobile/v1/location/geofences`
+  Returns all active geofence zones for the company.
+
+* **`LocationPing`** — model for individual GPS location data points.
+  Fields: lat/lng, accuracy, altitude, speed, bearing, provider, battery
+  level, activity type, mock detection, recorded_at.
+
+* **`LocationSession`** — model for location tracking sessions (periodic/trip).
+  Fields: session type, status lifecycle (active/paused/completed), purpose,
+  started/ended at, total distance/duration.
+
+* **`Geofence`** — model for circular geofence zones.
+  Fields: name, center lat/lng, radius, type (office/client_site/custom).
+
+* **`GeofenceEvent`** — model for geofence boundary-crossing events.
+  Fields: event type (enter/exit/dwell), linked to ping and geofence.
+
+---
+
 ## 0.2.0
 
 ### New features

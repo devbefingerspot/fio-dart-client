@@ -9,6 +9,7 @@ class MinimalEmployee {
     this.nip,
     this.userId,
     this.user,
+    this.isActive,
   });
 
   /// Employee UUID.
@@ -29,6 +30,9 @@ class MinimalEmployee {
   /// Associated user details, if available.
   final MinimalUser? user;
 
+  /// Whether the employee's employment is active.
+  final bool? isActive;
+
   factory MinimalEmployee.fromJson(Map<String, dynamic> json) {
     return MinimalEmployee(
       id: json['id'] as String,
@@ -39,6 +43,7 @@ class MinimalEmployee {
       user: json['user'] != null
           ? MinimalUser.fromJson(json['user'] as Map<String, dynamic>)
           : null,
+      isActive: json['is_active'] as bool?,
     );
   }
 
@@ -51,6 +56,7 @@ class MinimalEmployee {
     if (nip != null) map['nip'] = nip;
     if (userId != null) map['user_id'] = userId;
     if (user != null) map['user'] = user!.toJson();
+    if (isActive != null) map['is_active'] = isActive;
     return map;
   }
 }

@@ -5,12 +5,14 @@ import 'handler/mobile_api_auth_handler.dart';
 import 'interceptor/refresh_lock.dart';
 import 'interceptor/token_refresh_interceptor.dart';
 import 'services/auth_service.dart';
+import 'services/device_service.dart';
 import 'services/employee_attendance_service.dart';
 import 'services/employee_service.dart';
 import 'services/gps_attendance_service.dart';
 import 'services/integrity_service.dart';
 import 'services/invitation_service.dart';
 import 'services/leave_service.dart';
+import 'services/location_service.dart';
 import 'services/face_registry_service.dart';
 import 'services/my_approvals_service.dart';
 import 'services/my_attendance_service.dart';
@@ -96,6 +98,10 @@ class MobileApiClient {
       identityDio: _identityDio,
       authBaseUrl: authBaseUrl,
     );
+    devices = DeviceService(
+      identityDio: _identityDio,
+      authBaseUrl: authBaseUrl,
+    );
 
     // Backend services (use company token)
     integrity = IntegrityService(backendDio: _backendDio);
@@ -105,6 +111,7 @@ class MobileApiClient {
     employees = EmployeeService(backendDio: _backendDio);
     overtime = OvertimeService(backendDio: _backendDio);
     leave = LeaveService(backendDio: _backendDio);
+    location = LocationService(backendDio: _backendDio);
     myApprovals = MyApprovalsService(backendDio: _backendDio);
     userProfile = UserProfileService(backendDio: _backendDio);
     faceRegistry = FaceRegistryService(backendDio: _backendDio);
@@ -138,6 +145,10 @@ class MobileApiClient {
   /// [InvitationService.accept], [InvitationService.reject].
   late final InvitationService invitations;
 
+  /// Device operations: [DeviceService.getMyDevices],
+  /// [DeviceService.createDeviceChangeRequest].
+  late final DeviceService devices;
+
   // ── Backend services (company token) ───────────────────────────────────────
 
   /// Device integrity operations: [IntegrityService.getChallenge],
@@ -167,6 +178,13 @@ class MobileApiClient {
   /// Leave request operations: [LeaveService.listTypes], [LeaveService.list],
   /// [LeaveService.detail], [LeaveService.submit].
   late final LeaveService leave;
+
+  /// Location monitoring operations: [LocationService.submitPing],
+  /// [LocationService.submitBatch], [LocationService.startSession],
+  /// [LocationService.updateSession], [LocationService.listSessions],
+  /// [LocationService.getSessionDetail], [LocationService.queryHistory],
+  /// [LocationService.listGeofences].
+  late final LocationService location;
 
   /// Approval operations: [MyApprovalsService.list], [MyApprovalsService.detail],
   /// [MyApprovalsService.act].

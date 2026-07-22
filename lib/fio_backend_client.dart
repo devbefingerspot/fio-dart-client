@@ -52,6 +52,12 @@ export 'src/models/user/user_info_response.dart';
 export 'src/models/user/mobile_company.dart';
 export 'src/models/user/update_user_profile_request.dart';
 
+// ── Device models ────────────────────────────────────────────────────────────
+
+export 'src/models/device/my_device.dart';
+export 'src/models/device/create_device_change_request_request.dart';
+export 'src/models/device/create_device_change_request_response.dart';
+
 // ── Attendance models ─────────────────────────────────────────────────────────
 
 export 'src/models/attendance/attendance_type.dart';
@@ -102,6 +108,21 @@ export 'src/models/integrity/ios_attest_response.dart';
 // ── Invitation models ─────────────────────────────────────────────────────────
 
 export 'src/models/invitation/company_invitation.dart';
+
+// ── Location models ──────────────────────────────────────────────────────────
+
+export 'src/models/location/location_ping.dart';
+export 'src/models/location/location_session.dart';
+export 'src/models/location/submit_ping_request.dart';
+export 'src/models/location/batch_ping_request.dart';
+export 'src/models/location/start_session_request.dart';
+export 'src/models/location/update_session_request.dart';
+export 'src/models/location/list_sessions_params.dart';
+export 'src/models/location/session_detail_response.dart';
+export 'src/models/location/query_history_params.dart';
+export 'src/models/location/geofence.dart';
+export 'src/models/location/geofence_event.dart';
+
 // ── Face registry models ───────────────────────────────────────────────
 
 export 'src/models/face_registry/face_registry_record.dart';
@@ -117,9 +138,11 @@ export 'src/services/employee_attendance_service.dart';
 export 'src/services/employee_service.dart';
 export 'src/services/overtime_service.dart';
 export 'src/services/leave_service.dart';
+export 'src/services/location_service.dart';
 export 'src/services/my_approvals_service.dart';
 export 'src/services/office_service.dart';
 export 'src/services/invitation_service.dart';
+export 'src/services/device_service.dart';
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
 
