@@ -120,8 +120,8 @@ export 'src/models/location/update_session_request.dart';
 export 'src/models/location/list_sessions_params.dart';
 export 'src/models/location/session_detail_response.dart';
 export 'src/models/location/query_history_params.dart';
-export 'src/models/location/geofence.dart';
-export 'src/models/location/geofence_event.dart';
+export 'src/models/location/spot.dart';
+export 'src/models/location/spot_event.dart';
 
 // ── Face registry models ───────────────────────────────────────────────
 

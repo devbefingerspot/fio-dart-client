@@ -11,6 +11,22 @@
 * **`FeatureType`** — enum (`seat`, `usage`, `flag`, `unknown`) mirroring the
   backend's `feature_type` wire format.
 
+### Breaking changes
+
+* **`LocationService.listGeofences()`** — removed. Replaced by
+  **`LocationService.listSpots()`** — `GET /mobile/v1/location/spots`.
+  Returns active spot/checkpoint zones (previously the separate geofence
+  resource).
+
+* **`Geofence`** / **`GeofenceType`** — removed. Replaced by **`Spot`** /
+  **`SpotType`** (`spot`, `guardPatrol`, `workFromHome`). The `radius_meter`
+  field is now `radius`.
+
+* **`GeofenceEvent`** / **`GeofenceEventType`** — removed. Replaced by
+  **`SpotEvent`** / **`SpotEventType`**. The `geofence_id` field is now
+  `spot_id`, and `SubmitPingResponse` / `SubmitBatchResponse` expose
+  `spotEvents` (key `spot_events`) instead of `geofenceEvents`.
+
 ---
 
 ## 0.2.1

@@ -1,7 +1,7 @@
 # Location Monitoring — `fio_backend_client`
 
 > Guide to using the Location Monitoring feature (real-time GPS tracking, sessions,
-> geofencing, and history) via the Dart client `fio_backend_client`.
+> spot/checkpoint zones, and history) via the Dart client `fio_backend_client`.
 
 ---
 
@@ -17,8 +17,8 @@
 8. [Step 3 — Manage Tracking Sessions](#8-step-3--manage-tracking-sessions)
 9. [Step 4 — Query Session List & Detail](#9-step-4--query-session-list--detail)
 10. [Step 5 — Query Ping History](#10-step-5--query-ping-history)
-11. [Step 6 — List Geofences](#11-step-6--list-geofences)
-12. [Geofence Events](#12-geofence-events)
+11. [Step 6 — List Spots](#11-step-6--list-spots)
+12. [Spot Events](#12-spot-events)
 13. [Complete Example](#13-complete-example)
 14. [Validation Rules](#14-validation-rules)
 15. [Error Handling](#15-error-handling)
@@ -35,7 +35,7 @@ so a company can track field workers in real time. The backend:
 - Groups points into **sessions** (`LocationSession`) of two kinds:
   - `periodic` — continuous background tracking.
   - `trip` — a single journey with a start and end.
-- Evaluates **geofence** boundary crossings automatically and emits
+- Evaluates **spot** boundary crossings automatically and emits
   `enter` / `exit` events when a ping crosses a configured zone.
 - Exposes paginated history for both sessions and raw pings.
 
@@ -50,8 +50,8 @@ while a **manager** sees their own plus their direct subordinates, and an
 ```mermaid
 erDiagram
     LocationSession ||--o{ LocationPing : "groups (session_id)"
-    Geofence ||--o{ GeofenceEvent : "triggers"
-    LocationPing ||--o{ GeofenceEvent : "causes"
+    Spot ||--o{ SpotEvent : "triggers"
+    LocationPing ||--o{ SpotEvent : "causes"
 
     LocationPing {
         string id
@@ -70,17 +70,17 @@ erDiagram
         string started_at
         string ended_at
     }
-    Geofence {
+    Spot {
         string id
         string name
         double latitude
         double longitude
-        double radius_meter
-        string type
+        double radius
+        string type "SPOT|GUARD_PATROL|WORK_FROM_HOME"
     }
-    GeofenceEvent {
+    SpotEvent {
         string event_type "enter|exit|dwell"
-        string geofence_id
+        string spot_id
         string occurred_at
     }
 ```
@@ -89,8 +89,8 @@ erDiagram
 |---|---|
 | `LocationPing` | A single GPS data point. Always has `latitude`, `longitude`, `accuracy`, `provider`, `is_mock`, `recorded_at`. |
 | `LocationSession` | A tracking window (`periodic` or `trip`). Pings optionally reference it via `session_id`. |
-| `Geofence` | A circular zone (center + radius in meters). |
-| `GeofenceEvent` | Emitted when a ping crosses a geofence boundary. |
+| `Spot` | A circular checkpoint zone (center + radius in meters). |
+| `SpotEvent` | Emitted when a ping crosses a spot boundary. |
 
 ---
 
@@ -110,14 +110,14 @@ erDiagram
 │  ──── STREAM POSITION (periodic) ────                                  │
 │      │ POST /location/ping ───────────>│───────────────────────>│       │
 │      │   {latitude, longitude, ...}    │   save ping            │       │
-│      │                                 │   detect geofence      │       │
+│      │                                 │   detect spot          │       │
 │      │ <── {location_ping,             │<── events ─────────────│       │
-│      │      geofence_events}           │                        │       │
+│      │      spot_events}               │                        │       │
 │      │                                 │                        │       │
 │  ──── FLUSH BUFFER (offline) ────                                     │
 │      │ POST /location/batch ──────────>│───────────────────────>│       │
 │      │   {pings: [ ... up to 500 ]}    │   bulk insert          │       │
-│      │ <── {accepted, geofence_events} │<───────────────────────│       │
+│      │ <── {accepted, spot_events}     │<───────────────────────│       │
 │      │                                 │                        │       │
 │  ──── END THE SESSION ────                                            │
 │      │ PUT /location/sessions/{id} ───>│───────────────────────>│       │
@@ -127,7 +127,7 @@ erDiagram
 │  ──── REVIEW (manager / owner) ────                                   │
 │      │ GET /location/history ─────────>│───────────────────────>│       │
 │      │ GET /location/sessions ────────>│───────────────────────>│       │
-│      │ GET /location/geofences ───────>│───────────────────────>│       │
+│      │ GET /location/spots ───────────>│───────────────────────>│       │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -173,7 +173,7 @@ The location service is available at `client.location`.
 ## 6. Step 1 — Submit a Single Ping
 
 Use `submitPing` to stream one GPS position. The backend saves the ping and
-immediately runs geofence detection, returning any boundary-crossing events.
+immediately runs spot boundary detection, returning any crossing events.
 
 ```dart
 final response = await client.location.submitPing(
@@ -195,12 +195,12 @@ final response = await client.location.submitPing(
 );
 
 print(response.locationPing.id);
-for (final e in response.geofenceEvents ?? const <GeofenceEvent>[]) {
-  print('${e.eventType.value} -> geofence ${e.geofenceId}');
+for (final e in response.spotEvents ?? const <SpotEvent>[]) {
+  print('${e.eventType.value} -> spot ${e.spotId}');
 }
 ```
 
-- Response: `SubmitPingResponse { locationPing, geofenceEvents }`.
+- Response: `SubmitPingResponse { locationPing, spotEvents }`.
 - HTTP status: `201 Created`.
 
 ---
@@ -208,7 +208,7 @@ for (final e in response.geofenceEvents ?? const <GeofenceEvent>[]) {
 ## 7. Step 2 — Submit a Batch of Pings
 
 For offline buffering, accumulate pings locally and flush them in one call.
-The backend applies geofence detection **per ping**.
+The backend applies spot boundary detection **per ping**.
 
 ```dart
 final response = await client.location.submitBatch(
@@ -229,7 +229,7 @@ print('Accepted ${response.accepted} pings');
 ```
 
 - **Limit:** max **500** pings per batch (`maxBatchPings`).
-- Response: `SubmitBatchResponse { accepted, geofenceEvents }`.
+- Response: `SubmitBatchResponse { accepted, spotEvents }`.
 - HTTP status: `201 Created`.
 
 ---
@@ -337,25 +337,25 @@ for (final ping in history.data) {
 
 ---
 
-## 11. Step 6 — List Geofences
+## 11. Step 6 — List Spots
 
 ```dart
-final geofences = await client.location.listGeofences();
+final spots = await client.location.listSpots();
 
-for (final g in geofences) {
-  print('${g.name}: ${g.latitude},${g.longitude} r=${g.radiusMeter}m '
-        '(${g.type.value})');
+for (final s in spots) {
+  print('${s.name}: ${s.latitude},${s.longitude} r=${s.radius}m '
+        '(${s.type.value})');
 }
 ```
 
-- Returns only **active** geofences for the company.
+- Returns only **active** spots for the company.
 
 ---
 
-## 12. Geofence Events
+## 12. Spot Events
 
 The backend computes **Haversine distance** between each ping and every active
-geofence. A ping that crosses a boundary emits an event:
+spot. A ping that crosses a boundary emits an event:
 
 | Event | Condition |
 |---|---|
@@ -363,7 +363,7 @@ geofence. A ping that crosses a boundary emits an event:
 | `exit` | Previous ping inside → current ping outside. |
 | `dwell` | Defined in the schema but **not currently emitted** by the backend. |
 
-Events are returned in the `geofence_events` array of `submitPing` and
+Events are returned in the `spot_events` array of `submitPing` and
 `submitBatch` responses, and are also persisted server-side.
 
 ---
@@ -389,10 +389,10 @@ Future<void> trackTrip() async {
     ),
   );
 
-  // 3. React to geofence crossings
-  for (final e in ping.geofenceEvents ?? const <GeofenceEvent>[]) {
-    if (e.eventType == GeofenceEventType.enter) {
-      print('Entered zone ${e.geofenceId}');
+  // 3. React to spot crossings
+  for (final e in ping.spotEvents ?? const <SpotEvent>[]) {
+    if (e.eventType == SpotEventType.enter) {
+      print('Entered zone ${e.spotId}');
     }
   }
 
@@ -404,7 +404,7 @@ Future<void> trackTrip() async {
 }
 
 Future<void> reviewHistory() async {
-  final geofences = await client.location.listGeofences();
+  final spots = await client.location.listSpots();
   final sessions = await client.location.listSessions(
     ListSessionsParams(status: LocationSessionStatus.completed),
   );
@@ -412,7 +412,7 @@ Future<void> reviewHistory() async {
     QueryHistoryParams(startDate: '2026-08-01', endDate: '2026-08-18'),
   );
 
-  print('${geofences.length} geofences, '
+  print('${spots.length} spots, '
         '${sessions.meta.total} sessions, '
         '${history.meta.total} pings');
 }
@@ -470,12 +470,12 @@ try {
 | `LocationActivityType` (string) | `still`, `walking`, `running`, `on_bicycle`, `in_vehicle`, `tilting`, `unknown` |
 | `LocationSessionType` | `periodic`, `trip` |
 | `LocationSessionStatus` | `active`, `paused`, `completed` |
-| `GeofenceType` | `office`, `clientSite`, `custom` |
-| `GeofenceEventType` | `enter`, `exit`, `dwell` |
+| `SpotType` | `spot`, `guardPatrol`, `workFromHome` |
+| `SpotEventType` | `enter`, `exit`, `dwell` |
 
 > Note: `provider` and `activityType` on `SubmitPingRequest` are plain strings
-> (matching the backend's wire format), while `LocationSession`, `Geofence`, and
-> `GeofenceEvent` expose typed enums with a `.value` property.
+> (matching the backend's wire format), while `LocationSession`, `Spot`, and
+> `SpotEvent` expose typed enums with a `.value` property.
 
 ### Request DTOs
 
@@ -492,10 +492,10 @@ try {
 
 | DTO | Key fields |
 |---|---|
-| `SubmitPingResponse` | `locationPing`, `geofenceEvents?` |
-| `SubmitBatchResponse` | `accepted`, `geofenceEvents?` |
+| `SubmitPingResponse` | `locationPing`, `spotEvents?` |
+| `SubmitBatchResponse` | `accepted`, `spotEvents?` |
 | `LocationSession` | `id`, `sessionType`, `status`, `purpose?`, `startedAt`, `endedAt?`, `totalDistance?`, `totalDuration?` |
 | `SessionDetailResponse` | `session`, `pings` (paginated) |
 | `LocationPing` | `id`, `sessionId?`, `latitude`, `longitude`, `accuracy`, `provider`, `isMock`, `recordedAt`, … |
-| `Geofence` | `id`, `name`, `latitude`, `longitude`, `radiusMeter`, `type`, `isActive` |
-| `GeofenceEvent` | `id`, `geofenceId?`, `locationPingId?`, `eventType`, `occurredAt` |
+| `Spot` | `id`, `name`, `latitude`, `longitude`, `radius`, `type`, `isActive` |
+| `SpotEvent` | `id`, `spotId?`, `locationPingId?`, `eventType`, `occurredAt` |

@@ -1,4 +1,4 @@
-import 'geofence_event.dart';
+import 'spot_event.dart';
 import 'submit_ping_request.dart';
 
 /// Request to submit a batch of location pings (max 500).
@@ -20,17 +20,17 @@ class SubmitBatchRequest {
 class SubmitBatchResponse {
   const SubmitBatchResponse({
     required this.accepted,
-    this.geofenceEvents,
+    this.spotEvents,
   });
 
   final int accepted;
-  final List<GeofenceEvent>? geofenceEvents;
+  final List<SpotEvent>? spotEvents;
 
   factory SubmitBatchResponse.fromJson(Map<String, dynamic> json) {
     return SubmitBatchResponse(
       accepted: json['accepted'] as int,
-      geofenceEvents: (json['geofence_events'] as List<dynamic>?)
-          ?.map((e) => GeofenceEvent.fromJson(e as Map<String, dynamic>))
+      spotEvents: (json['spot_events'] as List<dynamic>?)
+          ?.map((e) => SpotEvent.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }

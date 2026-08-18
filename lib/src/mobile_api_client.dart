@@ -185,7 +185,7 @@ class MobileApiClient {
   /// [LocationService.submitBatch], [LocationService.startSession],
   /// [LocationService.updateSession], [LocationService.listSessions],
   /// [LocationService.getSessionDetail], [LocationService.queryHistory],
-  /// [LocationService.listGeofences].
+  /// [LocationService.listSpots].
   late final LocationService location;
 
   /// Approval operations: [MyApprovalsService.list], [MyApprovalsService.detail],
