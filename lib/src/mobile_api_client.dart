@@ -14,6 +14,7 @@ import 'services/invitation_service.dart';
 import 'services/leave_service.dart';
 import 'services/location_service.dart';
 import 'services/face_registry_service.dart';
+import 'services/feature_service.dart';
 import 'services/my_approvals_service.dart';
 import 'services/my_attendance_service.dart';
 import 'services/office_service.dart';
@@ -116,6 +117,7 @@ class MobileApiClient {
     userProfile = UserProfileService(backendDio: _backendDio);
     faceRegistry = FaceRegistryService(backendDio: _backendDio);
     offices = OfficeService(backendDio: _backendDio);
+    features = FeatureService(backendDio: _backendDio);
   }
 
   final String _authBaseUrl;
@@ -195,6 +197,9 @@ class MobileApiClient {
 
   /// Office operations: [OfficeService.getMyOffices].
   late final OfficeService offices;
+
+  /// Payment feature grants: [FeatureService.getMyFeatures].
+  late final FeatureService features;
 
   /// Face registry operations: [FaceRegistryService.get],
   /// [FaceRegistryService.register].

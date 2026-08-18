@@ -1,3 +1,18 @@
+## 0.3.0
+
+### New features
+
+* **`FeatureService.getMyFeatures()`** — `GET /mobile/v1/my-features`
+  Returns the list of payment features granted to the authenticated employee.
+
+* **`EmployeeFeature`** — model for a single payment feature grant.
+  Fields: `itemKey`, `itemName`, `featureType`, `status`, `parentItemKey`.
+
+* **`FeatureType`** — enum (`seat`, `usage`, `flag`, `unknown`) mirroring the
+  backend's `feature_type` wire format.
+
+---
+
 ## 0.2.1
 
 ### New features

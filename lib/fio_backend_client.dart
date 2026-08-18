@@ -127,6 +127,10 @@ export 'src/models/location/geofence_event.dart';
 
 export 'src/models/face_registry/face_registry_record.dart';
 export 'src/models/face_registry/face_registry_response.dart';
+
+// ── Feature models ──────────────────────────────────────────────────────
+
+export 'src/models/feature/employee_feature.dart';
 // ── Services ──────────────────────────────────────────────────────────────────
 
 export 'src/services/auth_service.dart';
@@ -143,6 +147,7 @@ export 'src/services/my_approvals_service.dart';
 export 'src/services/office_service.dart';
 export 'src/services/invitation_service.dart';
 export 'src/services/device_service.dart';
+export 'src/services/feature_service.dart';
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
 
