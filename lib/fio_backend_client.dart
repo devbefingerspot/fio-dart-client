@@ -120,13 +120,17 @@ export 'src/models/location/update_session_request.dart';
 export 'src/models/location/list_sessions_params.dart';
 export 'src/models/location/session_detail_response.dart';
 export 'src/models/location/query_history_params.dart';
-export 'src/models/location/geofence.dart';
-export 'src/models/location/geofence_event.dart';
+export 'src/models/location/spot.dart';
+export 'src/models/location/spot_event.dart';
 
 // ── Face registry models ───────────────────────────────────────────────
 
 export 'src/models/face_registry/face_registry_record.dart';
 export 'src/models/face_registry/face_registry_response.dart';
+
+// ── Feature models ──────────────────────────────────────────────────────
+
+export 'src/models/feature/employee_feature.dart';
 // ── Services ──────────────────────────────────────────────────────────────────
 
 export 'src/services/auth_service.dart';
@@ -143,6 +147,7 @@ export 'src/services/my_approvals_service.dart';
 export 'src/services/office_service.dart';
 export 'src/services/invitation_service.dart';
 export 'src/services/device_service.dart';
+export 'src/services/feature_service.dart';
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
 

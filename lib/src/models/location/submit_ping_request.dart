@@ -1,4 +1,4 @@
-import 'geofence_event.dart';
+import 'spot_event.dart';
 import 'location_ping.dart';
 
 /// Request to submit a single location ping.
@@ -56,17 +56,17 @@ class SubmitPingRequest {
 class SubmitPingResponse {
   const SubmitPingResponse({
     required this.locationPing,
-    this.geofenceEvents,
+    this.spotEvents,
   });
 
   final LocationPing locationPing;
-  final List<GeofenceEvent>? geofenceEvents;
+  final List<SpotEvent>? spotEvents;
 
   factory SubmitPingResponse.fromJson(Map<String, dynamic> json) {
     return SubmitPingResponse(
       locationPing: LocationPing.fromJson(json['location_ping'] as Map<String, dynamic>),
-      geofenceEvents: (json['geofence_events'] as List<dynamic>?)
-          ?.map((e) => GeofenceEvent.fromJson(e as Map<String, dynamic>))
+      spotEvents: (json['spot_events'] as List<dynamic>?)
+          ?.map((e) => SpotEvent.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
