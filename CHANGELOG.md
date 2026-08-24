@@ -1,3 +1,15 @@
+## Unreleased
+
+### Documentation
+
+* **`docs/location_monitoring.md`** — expanded with a new section
+  (2.1) explaining the `LocationProvider` (`gps`, `network`, `passive`,
+  `fused`) and `LocationActivityType` (`still`, `walking`, `running`,
+  `on_bicycle`, `in_vehicle`, `tilting`, `unknown`) enums, plus how
+  `activity_confidence` should be interpreted.
+
+---
+
 ## 0.3.0
 
 ### New features

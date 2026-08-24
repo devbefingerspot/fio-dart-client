@@ -9,6 +9,7 @@
 
 1. [Overview](#1-overview)
 2. [Data Model](#2-data-model)
+   - 2.1 [Location Provider & Activity Type](#21-location-provider--activity-type)
 3. [Overall Flow](#3-overall-flow)
 4. [Prerequisites](#4-prerequisites)
 5. [Setup — MobileApiClient](#5-setup--mobileapiclient)
@@ -91,6 +92,76 @@ erDiagram
 | `LocationSession` | A tracking window (`periodic` or `trip`). Pings optionally reference it via `session_id`. |
 | `Spot` | A circular checkpoint zone (center + radius in meters). |
 | `SpotEvent` | Emitted when a ping crosses a spot boundary. |
+
+### 2.1 Location Provider & Activity Type
+
+Every ping carries two pieces of **device-reported metadata** that describe
+*how* the position was obtained and *what* the employee was doing at that
+moment. Both are optional and stored as-is by the backend for analytics and
+audit purposes.
+
+---
+
+#### `LocationProvider` — How the position was obtained
+
+The source of the location fix. It tells you which technology produced the
+`latitude`/`longitude` pair and, indirectly, how accurate and battery-hungry
+it was:
+
+| Value | Meaning | Typical accuracy | Battery cost |
+|---|---|---|---|
+| `gps` | GPS/GNSS satellite fix (global positioning system) | ~3–10 m outdoors, no fix indoors | High |
+| `network` | Cell tower + Wi-Fi triangulation | ~10–100 m+ | Low |
+| `passive` | Position reused from another app/OS request — the app made no active request | Depends on the source | None |
+| `fused` | Fused Location Provider (Google Play Services) combining GPS, network, and sensor signals | Best balance of accuracy vs. power | Medium |
+
+**Interpretation tips:**
+
+- `gps` is the gold standard for field-worker tracking — trust the coordinates.
+- `network` is common indoors or when GPS is unavailable; treat coordinates as approximate.
+- `passive` indicates background tracking with minimal battery drain; positions may be stale or coarse.
+- `fused` is what most Android apps get from the standard API — a blend of the above.
+
+---
+
+#### `LocationActivityType` — What the user is doing
+
+Activity recognition is computed by the device's sensors (accelerometer,
+gyroscope, magnetometer) — typically via the Android `ActivityRecognitionClient`
+or iOS `CMMotionActivityManager`. The phone *guesses* the user's activity; it is
+**not guaranteed to be correct**.
+
+| Value | Meaning | Example use case |
+|---|---|---|
+| `still` | User is stationary (standing/sitting) | At desk, in office — consistent with a valid office location |
+| `walking` | Moving at walking pace (~1–2 m/s) | Walking to/from a client site |
+| `running` | Moving at running/jogging pace | Field worker on the move |
+| `on_bicycle` | Riding a bicycle | Delivery / courier routes |
+| `in_vehicle` | Inside a motorized vehicle (car, motorbike, bus) | Driving between locations — not at the office |
+| `tilting` | Device angle changed abruptly (picked up, put in pocket) | Transitional state, short-lived |
+| `unknown` | Device could not determine the activity | Low signal quality or sensor unavailable |
+
+#### `ActivityConfidence` — How sure the device is
+
+Each detected activity is paired with a confidence score (`0–100`):
+
+- `activity_type` answers **"what is the user doing?"**
+- `activity_confidence` answers **"how sure is the device?"**
+
+| Confidence | Interpretation |
+|---|---|
+| 80–100 | High — treat the activity as reliable |
+| 40–79 | Medium — cross-check with `speed`, `provider`, and coordinates |
+| 0–39 | Low — likely a misdetection, weigh other signals more heavily |
+
+**Example:** `activity_type = "in_vehicle"` with `activity_confidence = 95` at
+working hours strongly suggests the employee is driving, whereas
+`activity_type = "still"` + `activity_confidence = 90` at the office GPS
+coordinates is consistent with being at the workplace.
+
+> Note: on the wire (`SubmitPingRequest`), `provider` and `activityType` are
+> plain strings matching the backend enum values above. The Dart client passes
+> them through verbatim.
 
 ---
 
