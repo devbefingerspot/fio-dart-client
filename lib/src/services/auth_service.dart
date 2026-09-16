@@ -83,14 +83,24 @@ class AuthService {
 
   /// POST /api/v1/otp/request
   ///
-  /// Mengirim OTP generic ke user (email/phone sesuai [verifyMode]).
-  /// Membutuhkan company context ([companyId]).
+  /// Sends a generic OTP to the authenticated user, delivered to their own
+  /// email or phone depending on [verifyMode].
   ///
-  /// [verifyType] contoh: `"change_password"`, `"change_device"`, `"login"`, dll.
-  /// [verifyMode]: `"email"` atau `"phone"`.
+  /// No company context is required — the server resolves the user from the
+  /// identity token. The OTP is stored against the current session, so it must
+  /// be verified (and consumed by an endpoint such as
+  /// [changePassword]) with the same token/session.
+  ///
+  /// [verifyType] one of: `"change_password"`, `"change_device"`, `"login"`,
+  /// `"register"`, `"reset_password"`, `"other"`.
+  /// [verifyMode]: `"email"` or `"phone"`.
   ///
   /// Throws [ApiError] on any non-2xx response.
   Future<OTPRequestResponse> otpRequest(
+    @Deprecated(
+      'No longer used: the endpoint only needs a valid user session. '
+      'Scheduled for removal in 0.4.0.',
+    )
     String companyId,
     String verifyType,
     String verifyMode,
@@ -102,7 +112,6 @@ class AuthService {
           'verify_type': verifyType,
           'verify_mode': verifyMode,
         },
-        options: Options(headers: {'X-Company-ID': companyId}),
       );
       return OTPRequestResponse.fromJson(response.data!);
     } on DioException catch (e) {
@@ -112,11 +121,17 @@ class AuthService {
 
   /// POST /api/v1/otp/verify
   ///
-  /// Memverifikasi kode OTP generic.
-  /// Membutuhkan company context ([companyId]).
+  /// Verifies a generic OTP code previously requested via [otpRequest].
+  ///
+  /// No company context is required — the OTP is matched against the current
+  /// session, so it must be verified with the same token that requested it.
   ///
   /// Throws [ApiError] on any non-2xx response.
   Future<OTPVerifyResponse> otpVerify(
+    @Deprecated(
+      'No longer used: the endpoint only needs a valid user session. '
+      'Scheduled for removal in 0.4.0.',
+    )
     String companyId,
     String code,
     String verifyType,
@@ -130,7 +145,6 @@ class AuthService {
           'verify_type': verifyType,
           'verify_mode': verifyMode,
         },
-        options: Options(headers: {'X-Company-ID': companyId}),
       );
       return OTPVerifyResponse.fromJson(response.data!);
     } on DioException catch (e) {

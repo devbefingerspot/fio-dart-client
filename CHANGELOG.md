@@ -1,4 +1,20 @@
-## Unreleased
+## 0.3.1
+
+### Fixed
+
+* **`AuthService.otpRequest()`** / **`AuthService.otpVerify()`** — no longer send
+  the `X-Company-ID` header. The auth service resolves the user from the identity
+  token and ignored that header for mobile-platform tokens, which made
+  `verify_type: "change_password"` fail with
+  `401 {"error": "company not found"}`.
+
+### Deprecated
+
+* **`AuthService.otpRequest()`** / **`AuthService.otpVerify()`** — the `companyId`
+  argument is deprecated. Requesting or verifying an OTP needs only a valid user
+  session; no company context is involved (`otps` rows are keyed by
+  `user_id` + `session_id` + `verify_type` + `verify_mode`). The argument is kept
+  for source compatibility and will be removed in `0.4.0`.
 
 ### Documentation
 

@@ -127,6 +127,12 @@ enum FieldRequirementStatus {
 | `UserService` | getProfile, listCompanies, changeEmail, changePhone | identity + backend |
 | `InvitationService` | list, accept, reject | identity |
 
+The `otp*` methods need **no company context** — they authenticate with the
+identity token and the auth service resolves the user from it. Their `companyId`
+argument is deprecated (kept for source compatibility, removed in `0.4.0`).
+The OTP is stored against the current `sid` claim, so `otpRequest`, `otpVerify`
+and `changePassword` must all be called with the same token/session.
+
 ### Backend-Scoped (company Dio)
 
 | Service | Endpoints |
