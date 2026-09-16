@@ -1,3 +1,15 @@
+## 0.3.2
+
+### New features
+
+* **`GpsSettingsResponse.staleTimeMinutes`** — `GET /mobile/v1/gps-attendance/settings`
+  The number of minutes without a location ping before an open geofence spot
+  enter event is auto-resolved into an exit event, read from the backend's
+  `stale_time_minutes` key. Declared nullable so older backends that do not send
+  the key still parse.
+
+---
+
 ## 0.3.1
 
 ### Fixed

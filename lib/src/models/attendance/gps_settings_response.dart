@@ -10,6 +10,7 @@ class GpsSettingsResponse {
     required this.maxAttachmentNumber,
     required this.maxAdditionalPhotoNumber,
     this.gpsMaxDistanceFromOfficeMeter,
+    this.staleTimeMinutes,
   });
 
   /// Requirement status for front (selfie) photo in GPS attendance.
@@ -33,6 +34,11 @@ class GpsSettingsResponse {
   /// Maximum distance in meters from the assigned office for GPS attendance.
   final int? gpsMaxDistanceFromOfficeMeter;
 
+  /// Number of minutes without a location ping before an open geofence spot
+  /// enter event is auto-resolved into an exit event. Server-side only;
+  /// nullable for backward compatibility with older backends.
+  final int? staleTimeMinutes;
+
   /// Deprecated: use [maxAttachmentNumber] instead.
   @Deprecated('Use maxAttachmentNumber instead.')
   int get gpsMaxAttachmentNumber => maxAttachmentNumber;
@@ -44,16 +50,16 @@ class GpsSettingsResponse {
       gpsAdditionalPhoto: FieldRequirementStatus.fromJson(
           json['gps_additional_photo'] as String?),
       gpsNote: FieldRequirementStatus.fromJson(json['gps_note'] as String?),
-      gpsAttachment: FieldRequirementStatus.fromJson(
-          json['gps_attachment'] as String?),
-      maxAttachmentNumber:
-          (json['max_attachment_number'] as num?)?.toInt() ??
+      gpsAttachment:
+          FieldRequirementStatus.fromJson(json['gps_attachment'] as String?),
+      maxAttachmentNumber: (json['max_attachment_number'] as num?)?.toInt() ??
           (json['gps_max_attachment_number'] as num?)?.toInt() ??
           5,
       maxAdditionalPhotoNumber:
           (json['max_additional_photo_number'] as num?)?.toInt() ?? 3,
       gpsMaxDistanceFromOfficeMeter:
           (json['gps_max_distance_from_office_meter'] as num?)?.toInt(),
+      staleTimeMinutes: (json['stale_time_minutes'] as num?)?.toInt(),
     );
   }
 }
