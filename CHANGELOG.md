@@ -8,6 +8,13 @@
   `verify_type: "change_password"` fail with
   `401 {"error": "company not found"}`.
 
+* **`Leave.name`** — is now nullable and is parsed from `short_label`. The mobile
+  leave-types endpoint (`GET /mobile/v1/leaves`) returns `label` and `short_label`
+  but never `name`, so the previous `json['name'] as String` threw a `TypeError`
+  on every `Leave.fromJson()` call. Note that `short_label` carries the leave
+  **code**, not the display name; the backend's `label` field is not exposed by
+  this model.
+
 ### Deprecated
 
 * **`AuthService.otpRequest()`** / **`AuthService.otpVerify()`** — the `companyId`
