@@ -5,7 +5,7 @@ class Leave {
   const Leave({
     required this.id,
     required this.companyId,
-    required this.name,
+    this.name,
     this.amount,
     this.cycle,
     this.isPaid,
@@ -22,7 +22,7 @@ class Leave {
 
   final String id;
   final String companyId;
-  final String name;
+  final String? name;
   final int? amount;
   final String? cycle;
   final bool? isPaid;
@@ -40,7 +40,7 @@ class Leave {
     return Leave(
       id: json['id'] as String,
       companyId: json['company_id'] as String,
-      name: json['name'] as String,
+      name: json['short_label'] as String?,
       amount: json['amount'] as int?,
       cycle: json['cycle'] as String?,
       isPaid: json['is_paid'] as bool?,
