@@ -53,7 +53,10 @@ class GpsAttendanceService {
         '/mobile/v1/gps-attendance',
         data: request.toJson(),
       );
-      return SubmitGpsAttendanceResponse.fromJson(response.data!);
+      return SubmitGpsAttendanceResponse.fromJson(
+        response.data!,
+        replayed: response.statusCode == 200,
+      );
     } on DioException catch (e) {
       throw ApiError.fromDioException(e);
     }

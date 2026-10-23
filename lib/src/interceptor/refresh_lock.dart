@@ -9,8 +9,7 @@ class TokenRefreshLock {
   Completer<String>? _completer;
 
   /// `true` while a refresh call is in progress.
-  bool get isRefreshing =>
-      _completer != null && !_completer!.isCompleted;
+  bool get isRefreshing => _completer != null && !_completer!.isCompleted;
 
   /// Runs [fn] as the single-flight refresh operation.
   ///
@@ -28,6 +27,10 @@ class TokenRefreshLock {
 
     final completer = Completer<String>();
     _completer = completer;
+    // The shared future is consumed by concurrent waiters; marking it as
+    // handled keeps a failed refresh from surfacing as an unhandled async
+    // error while still delivering the error to anyone awaiting it.
+    completer.future.ignore();
 
     try {
       final token = await fn();

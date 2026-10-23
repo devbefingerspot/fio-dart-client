@@ -11,6 +11,9 @@ class GpsSettingsResponse {
     required this.maxAdditionalPhotoNumber,
     this.gpsMaxDistanceFromOfficeMeter,
     this.staleTimeMinutes,
+    this.offlineEnabled = false,
+    this.maxBackdateHours,
+    this.evidenceUploadTtlSeconds,
   });
 
   /// Requirement status for front (selfie) photo in GPS attendance.
@@ -39,6 +42,17 @@ class GpsSettingsResponse {
   /// nullable for backward compatibility with older backends.
   final int? staleTimeMinutes;
 
+  /// Whether the authenticated employee may submit deferred (offline)
+  /// attendance. Server-computed: false when the backend answered that the
+  /// `gps_offline` feature is not granted.
+  final bool offlineEnabled;
+
+  /// Maximum allowed backdating for a deferred submission, in hours.
+  final int? maxBackdateHours;
+
+  /// Window for uploading evidence after a submission, in seconds.
+  final int? evidenceUploadTtlSeconds;
+
   /// Deprecated: use [maxAttachmentNumber] instead.
   @Deprecated('Use maxAttachmentNumber instead.')
   int get gpsMaxAttachmentNumber => maxAttachmentNumber;
@@ -60,6 +74,10 @@ class GpsSettingsResponse {
       gpsMaxDistanceFromOfficeMeter:
           (json['gps_max_distance_from_office_meter'] as num?)?.toInt(),
       staleTimeMinutes: (json['stale_time_minutes'] as num?)?.toInt(),
+      offlineEnabled: json['offline_enabled'] as bool? ?? false,
+      maxBackdateHours: (json['max_backdate_hours'] as num?)?.toInt(),
+      evidenceUploadTtlSeconds:
+          (json['evidence_upload_ttl_seconds'] as num?)?.toInt(),
     );
   }
 }

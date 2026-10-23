@@ -1,5 +1,6 @@
 import '../common/minimal_employee.dart';
 import 'attendance_type.dart';
+import 'office_radius_status.dart';
 
 /// Attendance log entry returned in list responses.
 class AttendanceLog {
@@ -17,6 +18,8 @@ class AttendanceLog {
     this.distanceTolerance,
     this.description,
     this.approvalRequestId,
+    this.approvalStatus,
+    this.officeRadiusStatus,
     this.fullName,
     this.photoUrl,
     this.officeName,
@@ -43,6 +46,12 @@ class AttendanceLog {
   final double? distanceTolerance;
   final String? description;
   final String? approvalRequestId;
+
+  /// Approval state of the record (`in_approval`, `auto_approved`, …).
+  final String? approvalStatus;
+
+  /// Office radius outcome for GPS records; `null` for other methods.
+  final OfficeRadiusStatus? officeRadiusStatus;
   final String? fullName;
   final String? photoUrl;
   final String? officeName;
@@ -75,6 +84,10 @@ class AttendanceLog {
       distanceTolerance: (json['distance_tolerance'] as num?)?.toDouble(),
       description: json['description'] as String?,
       approvalRequestId: json['approval_request_id'] as String?,
+      approvalStatus: json['approval_status'] as String?,
+      officeRadiusStatus: OfficeRadiusStatus.fromString(
+        json['office_radius_status'] as String?,
+      ),
       fullName: json['full_name'] as String?,
       photoUrl: json['photo_url'] as String?,
       officeName: json['office_name'] as String?,

@@ -130,21 +130,67 @@ class TokenRefreshInterceptor extends Interceptor {
       final retryResponse = await plainDio.fetch<dynamic>(options);
       return handler.resolve(retryResponse);
     } on DioException catch (e) {
-      await onLoggedOut();
-      return handler.reject(_wrapAsApiError(e));
+      // Only a definitive rejection from the auth service invalidates the
+      // session. A network error or a 5xx means we could not ask, so keep the
+      // session: an offline client must still be able to queue and retry.
+      if (_isDefinitiveAuthFailure(e)) {
+        await onLoggedOut();
+        return handler.reject(_wrapAsApiError(e));
+      }
+      return handler.reject(_transientRefreshFailure(options, e));
     } on ApiError {
+      // No refresh token: the session cannot be recovered. Keep the original
+      // 401 in the rejection so callers treat it as terminal, not retryable.
       await onLoggedOut();
+      final apiError = ApiError(
+        statusCode: err.response?.statusCode,
+        message: 'Token refresh failed: no refresh token stored',
+        cause: err,
+      );
       return handler.reject(
         DioException(
           requestOptions: options,
-          error: err.error,
-          message: 'Token refresh failed',
+          response: err.response,
+          error: apiError,
+          message: apiError.message,
         ),
       );
-    } catch (_) {
-      await onLoggedOut();
-      return handler.reject(_wrapAsApiError(err));
+    } catch (e) {
+      return handler.reject(_transientRefreshFailure(
+        options,
+        DioException(
+          requestOptions: options,
+          error: e,
+          message: 'Token refresh failed',
+        ),
+      ));
     }
+  }
+
+  /// A refresh failure is definitive only when the auth service rejected the
+  /// refresh token (401/403). Anything else — no route, timeout, 5xx — is
+  /// transient and must not destroy the session.
+  bool _isDefinitiveAuthFailure(DioException e) {
+    final status = e.response?.statusCode;
+    return status == 401 || status == 403;
+  }
+
+  /// Packages a transient refresh failure as a retryable [ApiError]
+  /// (`statusCode == null` for transport errors, `5xx` for an auth outage).
+  DioException _transientRefreshFailure(
+      RequestOptions options, DioException cause) {
+    final apiError = ApiError(
+      statusCode: cause.response?.statusCode,
+      message: 'Token refresh unavailable: ${cause.message ?? cause.type.name}',
+      cause: cause,
+    );
+    return DioException(
+      requestOptions: options,
+      response: null,
+      type: cause.type,
+      error: apiError,
+      message: apiError.message,
+    );
   }
 
   /// Wraps a [DioException] in an [ApiError] and re-packages it as a

@@ -1,3 +1,57 @@
+## 0.4.0
+
+### Breaking
+
+* **`SubmitGpsAttendanceRequest`** — `clientSubmissionId` is now required, and
+  `SubmitGpsAttendanceRequest.online(...)` / `.offline(...)` are the
+  recommended constructors. Generate the id once at capture time and reuse it
+  on every retry: the backend returns the original record (HTTP 200) for a
+  repeated key instead of creating a duplicate.
+
+### New features
+
+* **Attendance history filters** — `ListAttendanceParams` gained
+  `attendanceTypes`, `methods` and `officeRadiusStatuses`, sent as repeated
+  query parameters (`?attendance_type=CHECK_IN&attendance_type=CHECK_OUT`).
+  `AttendanceLog` now exposes `officeRadiusStatus` and `approvalStatus`;
+  `OfficeRadiusStatus` (`inside` | `outside` | `unknown`) is a new enum.
+  The single `attendanceType` field is deprecated in favour of
+  `attendanceTypes`.
+* **Explicit submission mode** — `GpsAttendanceMode.online` / `.offline`.
+  `offline` requires `recordedAt`, so a deferred submission keeps its real
+  capture time instead of being stamped with the sync time.
+* **Provenance fields** — `accuracyMeter`, `provider`, and `isMock` are sent to
+  the backend and stored for radius/quality filtering.
+* **`SubmitGpsAttendanceResponse.replayed`** — true when the backend answered
+  `200` for an already accepted `clientSubmissionId`.
+* **`SubmitGpsAttendanceResponse.evidenceExpiresAt`** — absolute deadline for
+  the outstanding evidence upload.
+* **`GpsSettingsResponse.offlineEnabled` / `maxBackdateHours` /
+  `evidenceUploadTtlSeconds`** — lets the app decide whether to offer offline
+  capture and how far back it may go.
+
+### Fixed
+
+* **`TokenRefreshInterceptor` no longer logs the user out when the refresh call
+  fails for transport reasons.** A network error, timeout, or auth-service `5xx`
+  previously called `onLoggedOut()`, wiping the company token during an outage and
+  leaving a queued offline attendance stranded until a re-login that itself needed
+  network. The session is now kept and the caller receives a retryable `ApiError`
+  (`statusCode == null` for transport failures, `5xx` for an auth outage).
+  `onLoggedOut()` still runs for a definitive `401`/`403` from the auth service or
+  when no refresh token is stored.
+* **`TokenRefreshLock` no longer reports a failed refresh as an unhandled async
+  error.** The shared completer future is marked as handled, so a failure is
+  delivered only to callers awaiting the refresh.
+
+### Documentation
+
+* **`docs/gps_attendance_flow.md`** — the complete GPS attendance flow: online vs
+  deferred submission, idempotency, evidence upload, error classification, and the
+  contract an app-side offline queue must implement.
+
+---
+
 ## 0.3.2
 
 ### New features
