@@ -66,6 +66,7 @@ export 'src/models/attendance/gps_settings_response.dart';
 export 'src/models/attendance/submit_gps_attendance_request.dart';
 export 'src/models/attendance/submit_gps_attendance_response.dart';
 export 'src/models/attendance/list_attendance_params.dart';
+export 'src/models/attendance/office_radius_status.dart';
 
 // ── Employee models ───────────────────────────────────────────────────────────
 

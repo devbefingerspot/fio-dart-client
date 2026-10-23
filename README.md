@@ -269,34 +269,59 @@ final bad = parseJwtClaims('not-a-jwt'); // null
 
 ### GPS attendance
 
-```dart
-// Get GPS settings for the current company
-final settings = await client.gpsAttendance.getGpsSettings();
-print('Radius: ${settings.radius}m');
+See [docs/gps_attendance_flow.md](docs/gps_attendance_flow.md) for the complete flow
+(modes, idempotency, evidence upload, offline queue contract).
 
-// Submit GPS check-in
-final result = await client.gpsAttendance.submit(SubmitGpsAttendanceRequest(
-  type: AttendanceType.checkIn,
-  latitude: -6.200000,
-  longitude: 106.816666,
-  photo: 'base64-encoded-jpeg',
-));
-print('Submitted at ${result.time}');
+```dart
+final settings = await client.gpsAttendance.getSettings();
+if (!settings.offlineEnabled) {
+  // Offer online capture only.
+}
+
+// Generate the id once per capture and keep it for retries.
+final submissionId = newUuid();
+final capturedAt = DateTime.now().toUtc();
+final challenge = await client.integrity.getChallenge();
+
+// Immediate submission (the server stamps the time).
+final result = await client.gpsAttendance.submit(
+  SubmitGpsAttendanceRequest.online(
+    attendanceType: AttendanceType.checkIn,
+    latitude: -6.200000,
+    longitude: 106.816666,
+    clientSubmissionId: submissionId,
+    integrityPlatform: IntegrityPlatform.android,
+    integrityToken: playIntegrityToken,
+    integrityChallenge: challenge.challenge,
+  ),
+);
+
+// Deferred submission: same id, capture time preserved.
+// SubmitGpsAttendanceRequest.offline(..., recordedAt: capturedAt)
+
+await client.gpsAttendance.uploadEvidence(
+  attendanceLogId: result.attendanceLog.id,
+  uploadToken: result.uploadToken!,
+  frontPhoto: await MultipartFile.fromFile(selfiePath, filename: 'selfie.jpg'),
+);
 ```
 
 ### My attendance history
 
 ```dart
-// List current user's attendance (paginated)
+// Multi-select filters are sent as repeated query parameters.
 final page = await client.myAttendance.list(ListAttendanceParams(
   page: 1,
-  limit: 20,
-  dateFrom: DateTime(2025, 1, 1),
-  dateTo: DateTime(2025, 1, 31),
+  pageSize: 20,
+  startDate: '2026-10-01',
+  endDate: '2026-10-21',
+  attendanceTypes: [AttendanceType.checkIn, AttendanceType.checkOut],
+  methods: [AttendanceMethod.gps],
+  officeRadiusStatuses: [OfficeRadiusStatus.outside],
 ));
-print('Total records: ${page.meta.total}');
 for (final log in page.data) {
-  print('${log.date}: ${log.type}');
+  print('${log.timestamp}: ${log.attendanceType.value} '
+      'method=${log.method?.value} radius=${log.officeRadiusStatus?.value}');
 }
 ```
 
@@ -484,21 +509,28 @@ If set to `false` (default), logger output is disabled.
 
 | Method | Endpoint |
 |--------|----------|
-| `getChallenge()` | `GET /api/v1/integrity/challenge` |
-| `attestIos(IosAttestRequest)` | `POST /api/v1/integrity/attest/ios` |
+| `getChallenge()` | `GET /mobile/v1/integrity/challenge` |
+| `registerIosKey(IosAttestRequest)` | `POST /mobile/v1/ios/attest` |
 
 ### `GpsAttendanceService`
 
+See [docs/gps_attendance_flow.md](docs/gps_attendance_flow.md) for the full flow.
+
 | Method | Endpoint |
 |--------|----------|
-| `getGpsSettings()` | `GET /api/v1/gps-attendance/settings` |
-| `submit(SubmitGpsAttendanceRequest)` | `POST /api/v1/gps-attendance/submit` |
+| `getSettings()` | `GET /mobile/v1/gps-attendance/settings` |
+| `submit(SubmitGpsAttendanceRequest)` | `POST /mobile/v1/gps-attendance` |
+| `uploadEvidence(...)` | `POST /mobile/v1/gps-attendance/{id}/evidence` |
 
 ### `MyAttendanceService`
 
 | Method | Endpoint |
 |--------|----------|
-| `list(ListAttendanceParams)` | `GET /api/v1/my-attendance` |
+| `list(ListAttendanceParams)` | `GET /mobile/v1/my-attendance` |
+
+`ListAttendanceParams` supports multi-select filters, sent as repeated query
+parameters: `attendanceTypes`, `methods`, `officeRadiusStatuses` (`inside`,
+`outside`, `unknown`), plus `startDate` / `endDate`.
 
 ### `EmployeeAttendanceService`
 
