@@ -8,8 +8,9 @@ import '../models/employee/list_employees_params.dart';
 
 /// Provides employee list operations against the mobile backend.
 ///
-/// Owner role: Can view all employees in the company.
-/// Non-owner role: Can only view direct subordinates.
+/// Owner role: every employee of the company — no employee record required for
+/// the owner account itself.
+/// Non-owner role: only direct subordinates.
 ///
 /// Obtain this via [MobileApiClient.employees].
 class EmployeeService {

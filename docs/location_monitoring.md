@@ -44,6 +44,10 @@ Access control is automatic: a regular employee sees **only their own** data,
 while a **manager** sees their own plus their direct subordinates, and an
 **owner** sees everything (optionally filtered by `employee_id`).
 
+> An owner does not need an employee record. Such a session can read every
+> endpoint in this guide but cannot submit pings or sessions — see
+> [`owner_access.md`](owner_access.md).
+
 ---
 
 ## 2. Data Model

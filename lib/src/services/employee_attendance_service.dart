@@ -7,8 +7,9 @@ import '../models/common/paginated_response.dart';
 
 /// Provides employee attendance operations against the mobile backend.
 ///
-/// Owner role: Can view all employees' attendance.
-/// Non-owner role: Can only view direct subordinates' attendance.
+/// Owner role: every employee's attendance — no employee record required for the
+/// owner account itself.
+/// Non-owner role: only direct subordinates' attendance.
 ///
 /// Obtain this via [MobileApiClient.employeeAttendance].
 class EmployeeAttendanceService {

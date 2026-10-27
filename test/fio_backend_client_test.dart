@@ -87,4 +87,138 @@ void main() {
       expect(err.code, 'AUTH_001');
     });
   });
+
+  group('ApprovalActionRequest', () {
+    test('staged approver sends stage_id', () {
+      const req = ApprovalActionRequest(
+        stageId: 'stage-1',
+        action: ApprovalAction.approved,
+      );
+      final json = req.toJson();
+      expect(json['stage_id'], 'stage-1');
+      expect(json['action'], 'APPROVED');
+    });
+
+    test('owner omits stage_id', () {
+      const req = ApprovalActionRequest(action: ApprovalAction.rejected);
+      final json = req.toJson();
+      expect(json.containsKey('stage_id'), isFalse);
+      expect(json['action'], 'REJECTED');
+    });
+
+    test('optional fields are omitted when null', () {
+      const req = ApprovalActionRequest(action: ApprovalAction.approved);
+      final json = req.toJson();
+      expect(json.keys, ['action']);
+    });
+  });
+
+  group('ApprovalActionResponse', () {
+    test('parses an owner bypass response', () {
+      final res = ApprovalActionResponse.fromJson(
+        const {'status': 'approved', 'bypass': true},
+      );
+      expect(res.isApproved, isTrue);
+      expect(res.isBypass, isTrue);
+      expect(res.bypass, isTrue);
+    });
+
+    test('defaults bypass to false for a staged response', () {
+      final res = ApprovalActionResponse.fromJson(
+        const {'status': 'advanced_to_next_stage'},
+      );
+      expect(res.isAdvanced, isTrue);
+      expect(res.isBypass, isFalse);
+    });
+
+    test('detects pending_other_approvers', () {
+      final res = ApprovalActionResponse.fromJson(
+        const {'status': 'pending_other_approvers'},
+      );
+      expect(res.isPendingOtherApprovers, isTrue);
+      expect(res.isApproved, isFalse);
+      expect(res.isRejected, isFalse);
+    });
+  });
+
+  group('ListApprovalsParams', () {
+    test('employee filter uses status only', () {
+      const params = ListApprovalsParams(status: 'PENDING,APPROVED');
+      final query = params.toQueryParameters();
+      expect(query['status'], 'PENDING,APPROVED');
+      expect(query.containsKey('request_status'), isFalse);
+      expect(query.containsKey('employee_id'), isFalse);
+    });
+
+    test('owner filters use request_status and employee_id', () {
+      const params = ListApprovalsParams(
+        requestStatus: 'ALL',
+        employeeId: 'emp-1',
+        permissionType: PermissionType.leave,
+      );
+      final query = params.toQueryParameters();
+      expect(query['request_status'], 'ALL');
+      expect(query['employee_id'], 'emp-1');
+      expect(query['permission_type'], 'LEAVE');
+      expect(query.containsKey('status'), isFalse);
+    });
+
+    test('omits every optional filter by default', () {
+      const params = ListApprovalsParams();
+      final query = params.toQueryParameters();
+      expect(query, {'page': 1, 'page_size': 20});
+    });
+  });
+
+  group('ApprovalRequest', () {
+    test('parses the bypass audit trail', () {
+      final request = ApprovalRequest.fromJson(const {
+        'id': 'req-1',
+        'company_id': 'company-1',
+        'requester_id': 'emp-1',
+        'status': 'APPROVED',
+        'actions': [
+          {
+            'id': 'action-1',
+            'company_id': 'company-1',
+            'request_id': 'req-1',
+            'stage_id': 'stage-1',
+            'actor_user_id': 'user-owner',
+            'actor_role': 'owner',
+            'actor_name': 'Bench Owner',
+            'action': 'APPROVED',
+            'is_bypass': true,
+            'notes': 'approved by owner',
+          },
+        ],
+      });
+
+      expect(request.requesterId, 'emp-1');
+      expect(request.isBypassed, isTrue);
+      final action = request.actions!.single;
+      expect(action.actorRole, ApprovalActorRole.owner);
+      expect(action.actorName, 'Bench Owner');
+      expect(action.action, ApproverStatus.approved);
+      expect(action.isBypass, isTrue);
+      expect(action.stageId, 'stage-1');
+      expect(action.notes, 'approved by owner');
+    });
+
+    test('isBypassed is false without actions', () {
+      final request = ApprovalRequest.fromJson(const {
+        'id': 'req-1',
+        'company_id': 'company-1',
+        'status': 'IN_PROGRESS',
+      });
+
+      expect(request.actions, isNull);
+      expect(request.isBypassed, isFalse);
+    });
+
+    test('unknown actor_role falls back to employee', () {
+      expect(ApprovalActorRole.fromString('superuser'),
+          ApprovalActorRole.employee);
+      expect(ApprovalActorRole.fromString(null), ApprovalActorRole.employee);
+    });
+  });
 }

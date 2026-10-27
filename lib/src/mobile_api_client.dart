@@ -189,7 +189,8 @@ class MobileApiClient {
   late final LocationService location;
 
   /// Approval operations: [MyApprovalsService.list], [MyApprovalsService.detail],
-  /// [MyApprovalsService.act].
+  /// [MyApprovalsService.act]. Works for both roles; an owner's decision bypasses
+  /// the staged flow. See `docs/owner_access.md`.
   late final MyApprovalsService myApprovals;
 
   /// User profile update operations: [UserProfileService.update].

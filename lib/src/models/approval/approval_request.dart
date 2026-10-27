@@ -1,4 +1,5 @@
 import '../common/minimal_employee.dart';
+import 'approval_audit_action.dart';
 import 'approval_stage.dart';
 import 'approval_status.dart';
 
@@ -10,6 +11,7 @@ class ApprovalRequest {
     this.requestNumber,
     this.permissionType,
     this.templateId,
+    this.requesterId,
     this.requester,
     this.requestableType,
     this.requestableId,
@@ -24,6 +26,7 @@ class ApprovalRequest {
     this.longitude,
     this.geocodedAddress,
     this.stages,
+    this.actions,
     this.createdAt,
     this.updatedAt,
   });
@@ -33,6 +36,7 @@ class ApprovalRequest {
   final String? requestNumber;
   final PermissionType? permissionType;
   final String? templateId;
+  final String? requesterId;
   final MinimalEmployee? requester;
   final String? requestableType;
   final String? requestableId;
@@ -47,6 +51,13 @@ class ApprovalRequest {
   final double? longitude;
   final String? geocodedAddress;
   final List<ApprovalStage>? stages;
+
+  /// Decisions taken outside the staged flow (owner or admin bypass).
+  ///
+  /// Empty or `null` means every decision so far went through
+  /// [stages]. Returned by the detail endpoint only.
+  final List<ApprovalAuditAction>? actions;
+
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -59,6 +70,7 @@ class ApprovalRequest {
           ? PermissionType.fromString(json['permission_type'] as String)
           : null,
       templateId: json['template_id'] as String?,
+      requesterId: json['requester_id'] as String?,
       requester: json['requester'] != null
           ? MinimalEmployee.fromJson(json['requester'] as Map<String, dynamic>)
           : null,
@@ -86,6 +98,9 @@ class ApprovalRequest {
       stages: (json['stages'] as List<dynamic>?)
           ?.map((e) => ApprovalStage.fromJson(e as Map<String, dynamic>))
           .toList(),
+      actions: (json['actions'] as List<dynamic>?)
+          ?.map((e) => ApprovalAuditAction.fromJson(e as Map<String, dynamic>))
+          .toList(),
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -94,4 +109,7 @@ class ApprovalRequest {
           : null,
     );
   }
+
+  /// Whether the request was finalised outside the staged flow.
+  bool get isBypassed => actions?.any((a) => a.isBypass) ?? false;
 }

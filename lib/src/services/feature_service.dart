@@ -17,6 +17,10 @@ class FeatureService {
   /// employee. Flag features are company-level grants; seat/usage features
   /// reflect the employee's active assignments.
   ///
+  /// Employee-scoped: an owner account without an employee record has no seat to
+  /// report, so the endpoint answers `403` for it. Owner access to company data
+  /// is not seat-based.
+  ///
   /// Throws [ApiError] on any non-2xx response.
   Future<List<EmployeeFeature>> getMyFeatures() async {
     try {

@@ -18,6 +18,12 @@ import '../models/location/update_session_request.dart';
 /// Supports real-time GPS ping submission, batch uploads, trip/periodic
 /// session management, spot boundary detection, and paginated history queries.
 ///
+/// Write methods ([submitPing], [submitBatch], [startSession],
+/// [updateSession]) always record data for the caller's own employee record, so
+/// they require an employee-linked account. Read methods ([listSessions],
+/// [getSessionDetail], [queryHistory], [listSpots]) also work for an owner
+/// account without an employee record, scoped to the whole company.
+///
 /// Obtain this via [MobileApiClient.location].
 class LocationService {
   LocationService({required Dio backendDio}) : _backendDio = backendDio;
@@ -102,7 +108,8 @@ class LocationService {
   /// GET /mobile/v1/location/sessions
   ///
   /// Returns a paginated list of location sessions.
-  /// Self: own sessions. Owner/manager: own + subordinates.
+  /// Employee: own sessions + direct subordinates. Owner: every session of the
+  /// company, optionally narrowed with [ListSessionsParams.employeeId].
   ///
   /// Throws [ApiError] on any non-2xx response.
   Future<PaginatedResponse<LocationSession>> listSessions([
@@ -147,7 +154,8 @@ class LocationService {
   /// GET /mobile/v1/location/history
   ///
   /// Returns a paginated list of location pings across date range.
-  /// Self: own data. Owner/manager: own + subordinates.
+  /// Employee: own data + direct subordinates. Owner: every ping of the
+  /// company, optionally narrowed with [QueryHistoryParams.employeeId].
   ///
   /// Throws [ApiError] on any non-2xx response.
   Future<PaginatedResponse<LocationPing>> queryHistory([
@@ -170,7 +178,8 @@ class LocationService {
 
   /// GET /mobile/v1/location/spots
   ///
-  /// Returns all active spot/checkpoint zones for the company.
+  /// Returns all active spot/checkpoint zones for the company. Available to
+  /// both roles, including an owner without an employee record.
   ///
   /// Throws [ApiError] on any non-2xx response.
   Future<List<Spot>> listSpots() async {

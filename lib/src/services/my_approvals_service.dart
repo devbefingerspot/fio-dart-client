@@ -9,8 +9,15 @@ import '../models/common/paginated_response.dart';
 
 /// Provides "my approvals" operations against the mobile backend.
 ///
-/// Returns approval requests where the authenticated employee is listed as
-/// an approver. All shown regardless of current stage (monitoring view).
+/// The same three endpoints serve two roles:
+///
+/// * **Employee** — requests where the authenticated employee is listed as an
+///   approver. All are shown regardless of the current stage (monitoring view),
+///   and [act] advances one stage at a time.
+/// * **Owner** — every request of the company (an owner needs no employee
+///   record), and [act] bypasses the staged flow: all pending approvers are
+///   skipped and the request finalises immediately. The decision is audited and
+///   returned in [ApprovalRequest.actions].
 ///
 /// Obtain this via [MobileApiClient.myApprovals].
 class MyApprovalsService {
@@ -22,12 +29,15 @@ class MyApprovalsService {
 
   /// GET /mobile/v1/my-approvals
   ///
-  /// Returns a paginated list of approval requests where the authenticated
-  /// employee is an approver.
+  /// Returns a paginated list of approval requests.
   ///
-  /// By default, only PENDING requests are returned. Use
-  /// [ListApprovalsParams.status] = "all" for all statuses, or specify
-  /// specific statuses like "PENDING,APPROVED".
+  /// Employee: only requests where the employee is an approver; defaults to
+  /// PENDING approver rows. Use [ListApprovalsParams.status] = "all" for every
+  /// status, or a comma-separated list like "PENDING,APPROVED".
+  ///
+  /// Owner: every request of the company; defaults to `IN_PROGRESS` requests.
+  /// Use [ListApprovalsParams.requestStatus] (`"ALL"` for history) and
+  /// [ListApprovalsParams.employeeId] to narrow by requester.
   ///
   /// Throws [ApiError] on any non-2xx response.
   Future<PaginatedResponse<ApprovalRequest>> list([
@@ -49,8 +59,12 @@ class MyApprovalsService {
 
   /// GET /mobile/v1/my-approvals/{id}
   ///
-  /// Returns detailed information about a specific approval request,
-  /// including all stages and approvers.
+  /// Returns detailed information about a specific approval request, including
+  /// all stages and approvers, plus [ApprovalRequest.actions] — the audit trail
+  /// of decisions taken outside the staged flow.
+  ///
+  /// Employee: the request must list the employee as an approver, otherwise the
+  /// backend answers `403`.
   ///
   /// Throws [ApiError] on any non-2xx response.
   Future<ApprovalRequest> detail(String id) async {
@@ -74,15 +88,21 @@ class MyApprovalsService {
   /// [request] The action to take (approve/reject with optional notes and
   ///   geolocation).
   ///
-  /// Returns:
-  /// - `status: "approved"` — Final stage approved, request is complete.
-  /// - `status: "rejected"` — Request rejected, all remaining approvers skipped.
-  /// - `status: "advanced_to_next_stage"` — Stage approved, more stages remain.
+  /// Staged approver returns:
+  /// - `status: "approved"` — final stage approved, request is complete.
+  /// - `status: "rejected"` — request rejected, remaining approvers skipped.
+  /// - `status: "pending_other_approvers"` — this stage still awaits others.
+  /// - `status: "advanced_to_next_stage"` — stage approved, more stages remain.
+  ///
+  /// Owner returns one of the two terminal statuses with
+  /// [ApprovalActionResponse.bypass] = `true`; the staged flow is skipped, so
+  /// never send `stage_id` for an owner.
   ///
   /// Throws [ApiError] on any non-2xx response:
-  /// - 400: Invalid action or wrong stage_id.
+  /// - 400: Invalid action, wrong stage_id, or the request is no longer
+  ///   actionable (already terminal).
   /// - 403: Not a pending approver for this stage.
-  /// - 404: Request not found.
+  /// - 404: Request not found (or belongs to another company).
   Future<ApprovalActionResponse> act(
     String id,
     ApprovalActionRequest request,

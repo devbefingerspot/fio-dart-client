@@ -98,6 +98,7 @@ export 'src/models/approval/approval_stage.dart';
 export 'src/models/approval/approval_request.dart';
 export 'src/models/approval/approval_action_request.dart';
 export 'src/models/approval/approval_action_response.dart';
+export 'src/models/approval/approval_audit_action.dart';
 export 'src/models/approval/list_approvals_params.dart';
 
 // ── Integrity models ──────────────────────────────────────────────────────────

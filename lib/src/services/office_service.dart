@@ -10,9 +10,13 @@ class OfficeService {
 
   /// Returns the list of offices the current user has access to.
   ///
-  /// - **owner / subadmin / admin**: all offices in the company.
+  /// - **owner**: all offices in the company (works even when the owner account
+  ///   is not linked to an employee record).
   /// - **employee**: only the office linked to the employee's employment
   ///   (empty list if not assigned to any office).
+  ///
+  /// `subadmin` / `admin` cannot obtain a mobile token, so those branches do not
+  /// apply to this client.
   ///
   /// Throws [DioException] on network or server errors.
   Future<List<Office>> getMyOffices() async {

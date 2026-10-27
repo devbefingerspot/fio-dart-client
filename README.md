@@ -31,10 +31,20 @@ Handles the full mobile authentication flow — login → list companies → iss
 | `employees` | Employee list and detail |
 | `overtime` | Overtime requests: list/submit/review |
 | `leave` | Leave requests: active leaves, submit, balance, review |
-| `myApprovals` | Pending approvals for the current user |
+| `myApprovals` | Approvals: list/detail/act — staged approver, or terminal owner bypass |
 | `invitations` | Company invitations: list/accept/decline |
 | `userProfile` | Update user display name and profile photo |
 | `faceRegistry` | Register and retrieve face-recognition photos |
+| `offices` | Offices visible to the current user |
+| `location` | Location monitoring: pings, sessions, history, spots |
+| `features` | Payment feature grants of the current employee |
+
+### Roles
+
+`employee` and `owner` behave differently on several endpoints. An owner is a
+company-wide reader and approver that needs no employee record; its approval
+bypasses the staged flow and is audited. See
+[`docs/owner_access.md`](docs/owner_access.md).
 
 ---
 
@@ -372,16 +382,48 @@ final balance = await client.leave.getBalance();
 ### Approvals
 
 ```dart
-// List pending approvals for current user
-final pending = await client.myApprovals.list(ListApprovalsParams(
-  status: ApproverStatus.pending,
-));
+// Employee: requests where the current user is a staged approver
+final pending = await client.myApprovals.list(
+  const ListApprovalsParams(status: 'PENDING'),
+);
 
-// Approve a request
-await client.myApprovals.approve(ApprovalActionRequest(
-  requestId: pending.data.first.id,
-  stage: pending.data.first.currentStage,
-));
+// Approve the active stage
+final result = await client.myApprovals.act(
+  pending.data.first.id,
+  ApprovalActionRequest(
+    stageId: pending.data.first.currentStageId,
+    action: ApprovalAction.approved,
+    notes: 'ok',
+  ),
+);
+// result.isAdvanced | result.isApproved | result.isPendingOtherApprovers
+```
+
+An **owner** sees every request of the company and finalises it in one call. See
+[`docs/owner_access.md`](docs/owner_access.md).
+
+```dart
+// Owner: actionable queue (IN_PROGRESS), optionally filtered
+final queue = await client.myApprovals.list(const ListApprovalsParams());
+final history = await client.myApprovals.list(
+  const ListApprovalsParams(requestStatus: 'ALL'),
+);
+
+// Owner: terminal decision — no stage_id, the staged flow is bypassed
+final decision = await client.myApprovals.act(
+  queue.data.first.id,
+  const ApprovalActionRequest(
+    action: ApprovalAction.rejected,
+    notes: 'rejected by owner',
+  ),
+);
+// decision.isBypass == true
+
+// Who decided, and at which stage
+final detail = await client.myApprovals.detail(queue.data.first.id);
+for (final action in detail.actions ?? const <ApprovalAuditAction>[]) {
+  print('${action.actorName} ${action.action.value}');
+}
 ```
 
 ### Company invitations
@@ -566,9 +608,14 @@ parameters: `attendanceTypes`, `methods`, `officeRadiusStatuses` (`inside`,
 
 | Method | Endpoint |
 |--------|----------|
-| `list(ListApprovalsParams)` | `GET /api/v1/my-approvals` |
-| `approve(ApprovalActionRequest)` | `POST /api/v1/my-approvals/approve` |
-| `reject(ApprovalActionRequest)` | `POST /api/v1/my-approvals/reject` |
+| `list(ListApprovalsParams)` | `GET /mobile/v1/my-approvals` |
+| `detail(String id)` | `GET /mobile/v1/my-approvals/:id` |
+| `act(String id, ApprovalActionRequest)` | `POST /mobile/v1/my-approvals/:id/act` |
+
+Role behaviour differs — see [`docs/owner_access.md`](docs/owner_access.md). An
+owner's `act` bypasses the staged flow (`stageId` omitted,
+`ApprovalActionResponse.bypass == true`) and the audit trail is available on
+`ApprovalRequest.actions`.
 
 ### `InvitationService`
 

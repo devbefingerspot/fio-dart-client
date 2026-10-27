@@ -1,3 +1,39 @@
+## 0.5.0
+
+### New features
+
+* **Owner access** — the mobile API now supports an `owner` account that is not
+  linked to an employee record. Owner sessions get company-wide read scope and a
+  terminal approval decision; self-service writes stay employee-only. See
+  `docs/owner_access.md`.
+* **`ApprovalActionRequest.stageId` is now optional** — required for a staged
+  approver, omitted for an owner, whose decision bypasses the staged flow.
+  `POST /mobile/v1/my-approvals/{id}/act`
+* **`ApprovalActionResponse.bypass` / `isBypass`** — `true` when the backend
+  finalised the request outside the staged flow. Also added
+  `isPendingOtherApprovers` for the `pending_other_approvers` result an `ALL`
+  stage can return. `POST /mobile/v1/my-approvals/{id}/act`
+* **`ListApprovalsParams.requestStatus` / `employeeId`** — owner-scoped filters:
+  request status (`IN_PROGRESS` default, `ALL` for history) and requester.
+  `status` stays the employee-only approver-status filter.
+  `GET /mobile/v1/my-approvals`
+* **`ApprovalAuditAction`** — new model for the bypass audit trail returned in
+  `ApprovalRequest.actions`: who decided (`actorName`, `actorRole`,
+  `actorUserId`, `actorEmployeeId`), at which stage, with which notes and
+  coordinates. `ApprovalActorRole` (`employee` | `owner` | `subadmin` | `admin`)
+  is new. `GET /mobile/v1/my-approvals/{id}`
+* **`ApprovalRequest.requesterId` and `ApprovalRequest.isBypassed`**.
+* **`OfficeService.getMyOffices()` and the location read methods work for an
+  owner without an employee record**; their doc comments now state the scope per
+  role.
+
+### Documentation
+
+* **`docs/owner_access.md`** — the complete owner guide: role detection, read
+  scope, approval bypass, audit trail, employee-only endpoints, error reference.
+
+---
+
 ## 0.4.0
 
 ### Breaking
